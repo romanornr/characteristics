@@ -1,0 +1,239 @@
+---
+title: "AlleModulles"
+format: html
+editor: visual
+---
+
+## Module 1 heeft als doel Rscript in Quarto om een samenvattende beschrijving van de onderzoekspopulatie uit de ALS-trial te maken
+
+## opdracht 1 dataframe en codeboek inlezen
+
+```{r}
+trial <- read.csv2("trial.csv")
+codeboek <- read.csv2("codeboek.csv")
+```
+
+## Opdr. 2 centrummaten voor variabele "age at randomisation" Let op! dit is voor de totale groep
+
+```{r}
+median(trial$agerand)
+mean(trial$agerand)
+```
+
+## Opdr. 2.2 spreidingsmaten
+
+```{r}
+range(trial$agerand)
+sd(trial$agerand)
+summary(trial$agerand)
+IQR(trial$agerand)
+
+```
+
+## Opdr. 3 controle variabele "agerand"op normale verdeling
+
+```{r}
+hist(trial$agerand)
+boxplot(trial$agerand)
+qqnorm(trial$agerand)
+qqline(trial$agerand)
+```
+
+## Opdr. 4 subgroepen maken: placebo en nac (== stat voor ïs gelijk aan".
+
+```{r}
+placebo <- subset(trial,code=="0")
+nac <- subset(trial,code=="1")
+```
+
+## Opdr. 5 beschrijven van de variabelen per subset
+
+```{r}
+library(mosaic)
+```
+
+# Tabel beschrijven
+
+```{r}
+tally(~code,data=trial,format="count")
+```
+
+```{r}
+tally(~code,data=trial,format="percent")
+```
+
+## Age at randomisation (nummerieke data==\> mean & sd) in de nac groep
+
+```{r}
+hist(nac$agerand)
+boxplot(nac$agerand)
+qqnorm(nac$agerand)
+qqline(nac$agerand)
+summary(nac$agerand)
+shapiro.test(nac$agerand)
+```
+
+## Age at randomisation (nummerieke data) in de placebo groep
+
+```{r}
+hist(placebo$agerand)
+boxplot(placebo$agerand)
+qqnorm(placebo$agerand)
+qqline(placebo$agerand)
+summary(placebo$agerand)
+shapiro.test(placebo$agerand)
+```
+
+## 
+
+## geslacht (nominale (dichotoom) data) in de nac groep==\> aantal /frequentie en percentage
+
+```{r}
+table(nac$male)
+tally(~male,data=nac,format="percent")
+```
+
+## geslacht (nominale (dichotoom) data) in de placebo groep
+
+```{r}
+table(placebo$male)
+tally(~male,data=placebo,format="percent")
+```
+
+## site of onset (waar de symptomen zijn begonnen; kan alleen arm, been of bulbar regionen zijn=\> nominaal dus aantal/ frequentie en percentage
+
+```{r}
+table(placebo$site)
+```
+
+```{r}
+tally(~site,data=placebo,format="percent")
+```
+
+```{r}
+tally(~site,data=nac,format="count")
+tally(~site,data=nac,format="percent")
+```
+
+## Time since onset (nummerieke variabele; mean en sd) tijd is vaak niet normaal verdeeld; in beide subgroepen mediaan en min/max of IQR rapporteren!
+
+```{r}
+hist(placebo$tonset)
+boxplot(placebo$tonset)
+qqnorm(placebo$tonset)
+qqline(placebo$tonset)
+summary(placebo$tonset)
+shapiro.test(placebo$tonset)
+```
+
+```{r}
+hist(nac$tonset)
+boxplot(nac$tonset)
+qqnorm(nac$tonset)
+qqline(nac$tonset)
+summary(nac$tonset)
+shapiro.test(nac$tonset)
+```
+
+## Total MCR score op t=0 (verlies van spierkracht) met een ordinale schaal gemeten=\> mediaan en min/max of IQR!!
+
+```{r}
+summary(nac$totmrc0)
+```
+
+```{r}
+summary(placebo$totmrc0)
+```
+
+## Forced vital capacity at t=0; nummeriek/ continue maat mean en sd en er gelden assumpties
+
+```{r}
+hist(nac$fvc0)
+boxplot(nac$fvc0)
+qqnorm(nac$fvc0)
+qqline(nac$fvc0)
+summary(nac$fvc0)
+shapiro.test(nac$fvc0)
+```
+
+```{r}
+hist(placebo$fvc0)
+boxplot(placebo$fvc0)
+qqnorm(placebo$fvc0)
+qqline(placebo$fvc0)
+summary(placebo$fvc0)
+shapiro.test(placebo$fvc0)
+```
+
+## Assumpties voor normaliteit houden stand! beide p-waarden \> 0,05 dus normale verdeling!
+
+## Bharthel index (ADL=alg. dagelijkse levensverrichtingen) is een ordinale schaal dus mediaan en IQR
+
+```{r}
+summary(nac$barth0)
+summary(placebo$barth0)
+```
+
+```{r}
+tally(barth0~code,data=trial,format="count")
+tally(barth0~code,data=trial,format="percent")
+```
+
+## Beperkingen wordt m.b.v. Rankin scale gemeten=\> is een ordinale schaal dus mediaan en IQR en min/max
+
+```{r}
+summary(nac$rankin0)
+summary(placebo$rankin0)
+```
+
+```{r}
+tally(~rankin0,data=nac,format="count")
+tally(~rankin0,data=nac,format="percent")
+tally(~rankin0,data=placebo,format="count")
+tally(~rankin0,data=placebo,format="percent")
+```
+
+## Voor de rapportage is in dit geval aantallen en percentage handiger met het oog op de klinische duiding (0=geen beperking en 5=volledig beperkt)
+
+```{r}
+tally(rankin0~code,data=trial,format="count")
+tally(rankin0~code,data=trial,format="percent")
+```
+
+## Bulbar function wordt met Franchay Dysarthria Assesment gemeten=\> is een ordinale schaal dus mediaan en IQR
+
+```{r}
+summary(nac$bulbar0)
+summary(placebo$bulbar0)
+```
+
+## Opdracht 7 uitbreiden skills, opmaken histogram van fvc op t=1
+
+```{r}
+histogram(trial$fvc1, breaks=12, col="red", xlab="FVC", main="Forced Vital Capacity at T1", ylim=c(0,20))
+```
+
+## Opdracht 8.1 Fout opsporen
+
+```{r}
+mean(trial$fvcn0)
+```
+
+## Opdr.8.2 tabel met proporties van de variabele"site"
+
+```{r}
+tally(~trial$site,data=trial,format="proportion")
+```
+
+## Opdr. 8.3 grafische weergavevan de verdeling van de varialbele"rankin0"
+
+```{r}
+rankin.counts <- table(as.factor(trial$rankin0))
+barplot(rankin.counts)
+rankin.decreasing <- sort(rankin.counts, decreasing = TRUE)
+barplot(rankin.decreasing)
+dotplot(rankin.counts,ylab="rankin score", xlab="Frequency")
+dotplot(rankin.decreasing, ylab="rankin score", xlab="Frequency")
+```
+
+## Einde module 1
