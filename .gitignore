@@ -1,3 +1,4 @@
 confidential/*
 *.csv
 *.xlsx
+.Rproj.user
