@@ -1,45 +1,36 @@
 library(readxl)
 library(dplyr)
+library(ggplot2)
 
-
-# # Check if dplyr is installed and loaded
-# if (!requireNamespace("dplyr", quietly = TRUE)) {
-# 	stop("dplyr is not installed")
-# }
-
-# # Load dplyr if it's not already loaded
-# if (!"package:dplyr" %in% search()) {
-# 	library(dplyr)
-# 	message("dplyr loaded")}
 
 file_path <- "DATASET_V2_RG.xlsx"
 if (!file.exists(file_path)) stop("File does not exist")
 dataset <- read_excel(file_path)
 
-
-# replace_values_with_na_mutate <- function(df, rules) {
-#   df %>%
-#     mutate(across(
-#       .cols = names(rules),
-#       .fns = ~ if_else(. %in% rules[[cur_column()]], NA_real_, .)
-#     ))
-# }
-
 replace_values_with_na_mutate <- function(df, rules) {
-	dplyr::mutate(df, dplyr::across(
-		.cols = names(rules),
-		.fns = ~ dplyr::if_else(. %in% rules[[dplyr::cur_column()]], NA_real_, .)
-	))
+  df %>%
+    mutate(across(
+      .cols = names(rules),
+      .fns = ~ if_else(. %in% rules[[cur_column()]], NA_real_, .)
+    ))
 }
 
+# replace_values_with_na_mutate <- function(df, rules) {
+# 	dplyr::mutate(df, dplyr::across(
+# 		.cols = names(rules),
+# 		.fns = ~ dplyr::if_else(. %in% rules[[dplyr::cur_column()]], NA_real_, .)
+# 	))
+# }
+
 rules <- list(
-  Age = c(9999)
+  Age = c(9999),
+  TBV = c(9999)
 )
 
-
+# Create dmd and hc subsets
+# dmd <- dataset %>% filter(Disease == 1)
+# hc <- dataset %>% filter(Disease == 0)
 dmd <- dataset[dataset$Disease == 1, ]
-
-# Create HC (healthy controls) subset (Disease == 0)
 hc <- dataset[dataset$Disease == 0, ]
 
 message("DMD group amount of patients: ", nrow(dmd), "\n")
@@ -130,6 +121,7 @@ message("SD of HC kids in UK:", hc_kids_uk_age, "\n")
 
 
 # Create histograms, Q-Q plots and boxplots for the age of DMD and HC patients
+par(mfrow = c(1, 3))
 hist(dmd_adults_nl$Age, main = "Age distribution of DMD adults patients", xlab = "Age", col = "blue", breaks = 20)
 hist(dmd_kids_nl$Age, main = "Age distribution of DMD kids patients in NL", xlab = "Age", col = "red", breaks = 20)
 hist(dmd_kids_uk$Age, main = "Age distribution of DMD kids patients in UK", xlab = "Age", col = "green", breaks = 20)
@@ -140,6 +132,7 @@ hist(hc_kids_uk$Age, main = "Age distribution of HC kids patients in UK", xlab =
 
 
 # Create Q-Q plots for the age of DMD and HC patients
+par(mfrow = c(1, 3))
 qqnorm(dmd_adults_nl$Age, main = "Q-Q plot of DMD adults patients in NL"); qqline(dmd_adults_nl$Age)
 qqnorm(dmd_kids_nl$Age, main = "Q-Q plot of DMD kids patients in NL"); qqline(dmd_kids_nl$Age)
 qqnorm(dmd_kids_uk$Age, main = "Q-Q plot of DMD kids patients in UK"); qqline(dmd_kids_uk$Age)
@@ -182,12 +175,171 @@ hc_kids_uk_shapiro <- shapiro.test(hc_kids_uk$Age)
 print(hc_kids_uk_shapiro)
 
 
-# # Print first 5 rows of adults_netherlands
-# message("First 5 rows of adults_netherlands:")
-# print(head(dmd_adults_netherlands, 5))
+# ScannerType
+# note, can also be done with filter
+# such as: dmd_adults_nl_8ch <- dmd_adults_nl %>% filter(ScannerType == 0)
+# 0 = 8 channel headcoil
+# 1 = 32 channel headcoil
+# 9 = missing data  
+dmd_adults_nl_8ch <- dmd_adults_nl[dmd_adults_nl$ScannerType == 0, ]
+dmd_adults_nl_32ch <- dmd_adults_nl[dmd_adults_nl$ScannerType == 1, ]
+dmd_adults_nl_missing <- dmd_adults_nl[dmd_adults_nl$ScannerType == 9, ]
+message("DMD adults in NL with 8 channel headcoil:", nrow(dmd_adults_nl_8ch))
+message("DMD adults in NL with 32 channel headcoil:", nrow(dmd_adults_nl_32ch))
+message("DMD adults in NL with missing data:", nrow(dmd_adults_nl_missing), "\n")
 
-# message("First 5 rows of kids_netherlands:")
-# print(head(dmd_kids_netherlands, 5))
 
-# message("First 6 rows of kids_uk:")
-# print(head(dmd_kids_uk, 5))
+dmd_kids_nl_8ch <- dmd_kids_nl[dmd_kids_nl$ScannerType == 0, ]
+dmd_kids_nl_32ch <- dmd_kids_nl[dmd_kids_nl$ScannerType == 1, ]
+dmd_kids_nl_missing <- dmd_kids_nl[dmd_kids_nl$ScannerType == 9, ]
+message("DMD kids in NL with 8 channel headcoil:", nrow(dmd_kids_nl_8ch))
+message("DMD kids in NL with 32 channel headcoil:", nrow(dmd_kids_nl_32ch))
+message("DMD kids in NL with missing data:", nrow(dmd_kids_nl_missing), "\n")
+
+dmd_kids_uk_8ch <- dmd_kids_uk[dmd_kids_uk$ScannerType == 0, ]
+dmd_kids_uk_32ch <- dmd_kids_uk[dmd_kids_uk$ScannerType == 1, ]
+dmd_kids_uk_missing <- dmd_kids_uk[dmd_kids_uk$ScannerType == 9, ]
+message("DMD kids in UK with 8 channel headcoil:", nrow(dmd_kids_uk_8ch))
+message("DMD kids in UK with 32 channel headcoil:", nrow(dmd_kids_uk_32ch))
+message("DMD kids in UK with missing data:", nrow(dmd_kids_uk_missing), "\n")
+
+
+hc_adults_nl_8ch <- hc_adults_nl[hc_adults_nl$ScannerType == 0, ]
+hc_adults_nl_32ch <- hc_adults_nl[hc_adults_nl$ScannerType == 1, ]
+hc_adults_nl_missing <- hc_adults_nl[hc_adults_nl$ScannerType == 9, ]
+
+message("HC adults in NL with 8 channel headcoil:", nrow(hc_adults_nl_8ch))
+message("HC adults in NL with 32 channel headcoil:", nrow(hc_adults_nl_32ch))
+message("HC adults in NL with missing data:", nrow(hc_adults_nl_missing), "\n")
+
+hc_kids_nl_8ch <- hc_kids_nl[hc_kids_nl$ScannerType == 0, ] 
+hc_kids_nl_32ch <- hc_kids_nl[hc_kids_nl$ScannerType == 1, ]
+hc_kids_nl_missing <- hc_kids_nl[hc_kids_nl$ScannerType == 9, ]
+
+message("HC kids in NL with 8 channel headcoil:", nrow(hc_kids_nl_8ch))
+message("HC kids in NL with 32 channel headcoil:", nrow(hc_kids_nl_32ch))
+message("HC kids in NL with missing data:", nrow(hc_kids_nl_missing), "\n") 
+
+hc_kids_uk_8ch <- hc_kids_uk[hc_kids_uk$ScannerType == 0, ]
+hc_kids_uk_32ch <- hc_kids_uk[hc_kids_uk$ScannerType == 1, ]
+hc_kids_uk_missing <- hc_kids_uk[hc_kids_uk$ScannerType == 9, ]
+
+message("HC kids in UK with 8 channel headcoil:", nrow(hc_kids_uk_8ch))
+message("HC kids in UK with 32 channel headcoil:", nrow(hc_kids_uk_32ch))
+message("HC kids in UK with missing data:", nrow(hc_kids_uk_missing), "\n")
+
+# Create a scatterplot of brain volume on the y-axis and the age on the x-axis
+# The healthy controls are in blue and the DMD patients are in red
+# The TBV column is the total brain volume
+dmd_patients <- rbind(dmd_adults_nl, dmd_kids_nl, dmd_kids_uk) %>% mutate(group = "red")
+hc_patients <- rbind(hc_adults_nl, hc_kids_nl, hc_kids_uk) %>% mutate(group = "blue")
+all_patients <- replace_values_with_na_mutate(rbind(dmd_patients, hc_patients), rules)
+
+# all_patients_first_visit <- all_patients %>% filter(Visit == 1)
+# all_patients_second_visit <- all_patients %>% filter(Visit == 2)
+
+all_dmd_patients_first_visit <- dmd_patients %>% filter(Visit == 1)
+all_dmd_patients_second_visit <- dmd_patients %>% filter(Visit == 2)
+all_hc_patients_first_visit <- hc_patients %>% filter(Visit == 1)
+all_hc_patients_second_visit <- hc_patients %>% filter(Visit == 2)
+
+
+
+# # Create a basic scatter plot
+# plot <- ggplot(mtcars, aes(x = wt, y = mpg)) +
+#     geom_point() +
+#     labs(title = "Scatter plot of MPG vs Weight",
+#          x = "Weight (1000 lbs)",
+#          y = "Miles per Gallon (MPG)")
+
+# # Save the plot to a file
+# ggsave("scatter_plot.png", plot = plot)
+
+
+# # Create a basic scatter plot
+# ggplot(mtcars, aes(x = wt, y = mpg)) +
+#     geom_point() +
+#     labs(title = "Scatter plot of MPG vs Weight",
+#          x = "Weight (1000 lbs)",
+#          y = "Miles per Gallon (MPG)")
+
+
+
+
+
+#plot(all_patients$Age, all_patients$TBV, col = all_patients$group, pch = 19, xlab = "Age", ylab = "TBV", main = "Scatterplot of brain volume on the y-axis and the age on the x-axis")
+#Now make this scatterplot with ggplot instead
+test <- ggplot(all_patients, aes(x = Age, y = TBV, color = group)) +
+  geom_point(
+    na.rm = TRUE,
+  ) +
+  labs(title = "Scatterplot of brain volume on the y-axis and the age on the x-axis",
+       x = "Age",
+       y = "TBV",
+       color = "Group") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_color_manual(values = c("blue", "red")) +
+  geom_smooth(method = "lm", se = FALSE, color = "green") +
+  theme_minimal()
+
+
+# Save the plot to a file
+ggsave("scatter_plot.png", plot = test)
+
+
+# # Now make it a scatterplot 
+# ggplot(all_patients, aes(x = Age, y = TBV, color = group)) +
+#   geom_point(
+#     na.rm = TRUE,
+#   )
+#   labs(title = "Scatterplot of brain volume on the y-axis and the age on
+#   x-axis",
+#     x = "Age",
+#     y = "TBV",
+#     color = "Group") +
+#     theme(plot.title = element_text(hjust = 0.5)) +
+#     scale_color_manual(values = c("blue", "red")) +
+#     geom_smooth(method = "lm", se = FALSE, color = "black") +
+#     theme_minimal()
+
+#ggplot(data = all_patients)
+#print(all_patients)
+
+
+# # Change the point colors and shapes
+# # Change the line type and color
+# ggplot(all_patients, aes(x=Age, y=TBV)) + 
+#   geom_point(shape=18, color="blue")+
+#   geom_smooth(method=lm, se=FALSE, linetype="dashed",
+#              color="darkred")
+# # Change the confidence interval fill color
+# ggplot(all_patients, aes(x=Age, y=TBV)) + 
+#   geom_point(shape=18, color="blue")+
+#   geom_smooth(method=lm,  linetype="dashed",
+#              color="darkred", fill="blue")
+
+
+
+# ggplot2::ggplot(all_patients, aes(x = Age, y = TBV, color = group)) +
+#   ggplot2::geom_point(
+#     na.rm = TRUE,
+#   ) +
+#   ggplot2::labs(title = "Scatterplot of brain volume on the y-axis and the age on the x-axis",
+#                 x = "Age",
+#                 y = "TBV",
+#                 color = "Group") +
+#                 ggplot2::theme(plot.title = element_text(hjust = 0.5)) +
+#                 ggplot2::scale_color_manual(values = c("blue", "red")) +
+#                 ggplot2::geom_smooth(method = "lm", se = FALSE, color = "black") +
+#                 ggplot2::theme_minimal()
+
+# ggplot2::ggplot(all_patients, aes(x = Age, y = TBV, color = group)) +
+#   ggplot2::geom_point() +
+#   ggplot2::labs(title = "Scatterplot of brain volume on the y-axis and the age on the x-axis",
+#                 x = "Age",
+#                 y = "TBV",
+#                 color = "Group") +
+#                 ggplot2::theme(plot.title = element_text(hjust = 0.5)) +
+#                 ggplot2::scale_color_manual(values = c("blue", "red")) +
+#                 ##ggplot2::geom_smooth(method = "lm", se = FALSE, color = "black") +
+#                 ggplot2::theme_minimal()

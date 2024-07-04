@@ -1,0 +1,20 @@
+# A tibble: 102 × 30
+   ID          CBF CBF_PVC Visit   Age Disease DiseaseGroup Corticosteroid
+   <chr>     <dbl>   <dbl> <dbl> <dbl>   <dbl>        <dbl>          <dbl>
+ 1 DMDBA_001  57.8    76.6     1  20.9       1            9              0
+ 2 DMDBA_002  50.5    NA       1  24.8       1            2              9
+ 3 DMDBA_003  41.9    41.9     1  24.1       1            1              1
+ 4 DMDBA_004  26.6    26.6     1  24.3       1            1              0
+ 5 DMDBA_005  47.8    16.3     1  23.4       1            9              9
+ 6 DMDBA_006  63.7    87.2     1  22.3       1            9              9
+ 7 DMDBA_007  41.9    NA       1  24.9       1            9              9
+ 8 DMDBA_008  45.5   105.      1  20.8       1            9              9
+ 9 DMDBA_009  62.7    80.4     1  20.3       1            9              9
+10 DMDBA_010  47.8   118.      1  24.0       1            9              9
+# ℹ 92 more rows
+# ℹ 22 more variables: CorticoType <dbl>, TestingSite <dbl>, Study <dbl>,
+#   ScannerType <dbl>, Comorbid <dbl>, ComorbidNum <dbl>, GMV <dbl>, WMV <dbl>,
+#   CSFV <dbl>, TBV <dbl>, ICV <dbl>, ...20 <lgl>, ...21 <lgl>, Peabody <dbl>,
+#   Peabody_Z <dbl>, SDQ_Total <dbl>, PARS_Total <dbl>, PARS_Cor <dbl>,
+#   FePsy_Auditory_M <dbl>, FePsy_Auditory_SD <dbl>, FePsy_Visual_M <dbl>,
+#   FePsy_Visual_SD <dbl>
