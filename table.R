@@ -228,60 +228,140 @@ message("HC kids in UK with 8 channel headcoil:", nrow(hc_kids_uk_8ch))
 message("HC kids in UK with 32 channel headcoil:", nrow(hc_kids_uk_32ch))
 message("HC kids in UK with missing data:", nrow(hc_kids_uk_missing), "\n")
 
-# Create a scatterplot of brain volume on the y-axis and the age on the x-axis
-# The healthy controls are in blue and the DMD patients are in red
-# The TBV column is the total brain volume
-dmd_patients <- rbind(dmd_adults_nl, dmd_kids_nl, dmd_kids_uk) %>% mutate(group = "red")
-hc_patients <- rbind(hc_adults_nl, hc_kids_nl, hc_kids_uk) %>% mutate(group = "blue")
-all_patients <- replace_values_with_na_mutate(rbind(dmd_patients, hc_patients), rules)
+# # Plot of brain volume on the y-axis and the age on the x-axis
+# # healthy controls are in blue and the DMD patients are in red
+# # TBV column is the total brain volume
+# dmd_patients <- rbind(dmd_adults_nl, dmd_kids_nl, dmd_kids_uk) %>% mutate(group = "red")
+# hc_patients <- rbind(hc_adults_nl, hc_kids_nl, hc_kids_uk) %>% mutate(group = "blue")
+# all_patients <- replace_values_with_na_mutate(rbind(dmd_patients, hc_patients), rules)
 
-# all_patients_first_visit <- all_patients %>% filter(Visit == 1)
-# all_patients_second_visit <- all_patients %>% filter(Visit == 2)
-
-all_dmd_patients_first_visit <- dmd_patients %>% filter(Visit == 1)
-all_dmd_patients_second_visit <- dmd_patients %>% filter(Visit == 2)
-all_hc_patients_first_visit <- hc_patients %>% filter(Visit == 1)
-all_hc_patients_second_visit <- hc_patients %>% filter(Visit == 2)
+# all_dmd_patients_first_visit <- dmd_patients %>% filter(Visit == 1)
+# all_dmd_patients_second_visit <- dmd_patients %>% filter(Visit == 2)
+# all_hc_patients_first_visit <- hc_patients %>% filter(Visit == 1)
+# all_hc_patients_second_visit <- hc_patients %>% filter(Visit == 2)
 
 
-
-# # Create a basic scatter plot
-# plot <- ggplot(mtcars, aes(x = wt, y = mpg)) +
-#     geom_point() +
-#     labs(title = "Scatter plot of MPG vs Weight",
-#          x = "Weight (1000 lbs)",
-#          y = "Miles per Gallon (MPG)")
-
-# # Save the plot to a file
-# ggsave("scatter_plot.png", plot = plot)
+# # Combine first and second visit data for plotting lines
+# dmd_patients_visits <- rbind(all_dmd_patients_first_visit, all_dmd_patients_second_visit)
+# hc_patients_visits <- rbind(all_hc_patients_first_visit, all_hc_patients_second_visit)
 
 
-# # Create a basic scatter plot
-# ggplot(mtcars, aes(x = wt, y = mpg)) +
-#     geom_point() +
-#     labs(title = "Scatter plot of MPG vs Weight",
-#          x = "Weight (1000 lbs)",
-#          y = "Miles per Gallon (MPG)")
+# # Each patient has a unique ID, which is in the column called "ID", so we can use this to identify the patients
+# # We plot the brain volume on the y-axis and the age on the x-axis
+# # We color the points based on the group (DMD or HC)
+# # We have a subset of dmd patients and healthy controls first and second visit
+# # We can also use this to compare the brain volume of the same patients between their first visit and second visit 
+# # Draw a line from their first visit which is a dot to their second visit which is another dot
+# # But the dots of of the patient at their first visit has to connect to their second visit
+# # Not draw a line from one close dot to another close dot
+# # It should connect the dots of the same patient
+
+# # Create the scatter plot
+# test <- ggplot() +
+#   # Plot DMD patients
+#   geom_point(data = all_dmd_patients_first_visit, aes(x = Age, y = TBV, color = group), size = 2) +
+#   geom_point(data = all_dmd_patients_second_visit, aes(x = Age, y = TBV, color = group), size = 2) +
+#   geom_line(data = dmd_patients_visits, aes(x = Age, y = TBV, group = ID), color = "red", linetype = "dashed") +
+  
+#   # Plot HC patients
+#   geom_point(data = all_hc_patients_first_visit, aes(x = Age, y = TBV, color = group), size = 2) +
+#   geom_point(data = all_hc_patients_second_visit, aes(x = Age, y = TBV, color = group), size = 2) +
+#   geom_line(data = hc_patients_visits, aes(x = Age, y = TBV, group = ID), color = "blue", linetype = "dashed") +
+  
+#   # Labels and Theme
+#   labs(title = "Brain Volume (TBV) vs Age",
+#        x = "Age (years)",
+#        y = "Total Brain Volume (TBV)",
+#        color = "Group") +
+#   scale_color_manual(values = c("red" = "red", "blue" = "blue")) +
+#   theme_minimal()
+
+
+
+# Example data for DMD patients and healthy controls
+hc_patients_first_visit <- data.frame(
+  ID = c(4, 4, 5, 5, 6, 6),
+  Age = c(9, 10, 11, 12, 13, 14),
+  TBV = c(1500, 1490, 1450, 1440, 1420, 1410),
+  Visit = c(1, 2, 1, 2, 1, 2),
+  group = "blue"
+)
+
+hc_patients_second_visit <- data.frame(
+  ID = c(4, 4, 5, 5, 6, 6),
+  Age = c(11, 14, 16, 19, 23, 28),
+  TBV = c(2000, 3000, 4000, 5000, 6000, 9000),
+  Visit = c(2, 2, 2, 2, 2, 2),
+  group = "blue"
+)
+
+
+
+dmd_patients_first_visit <- data.frame(
+  ID = c(1, 2, 3, 4, 5, 6),
+  Age = c(10, 11, 12, 13, 14, 15),
+  TBV = c(5000, 6000, 7000, 8000, 9000, 10000),
+  Visit = c(1, 1, 1, 1, 1, 1),
+  group = "red"
+)
+
+dmd_patients_second_visit <- data.frame(
+  ID = c(1, 2, 3, 4, 5, 6),
+  Age = c(20, 21, 22, 33, 34, 40),
+  TBV = c(4000, 5000, 6000, 7000, 8000, 9000),
+  Visit = c(1, 2, 2, 2, 2, 2),
+  group = "red"
+)
 
 
 
 
+# Combine first and second visit data for plotting lines
+dmd_patients_visits <- rbind(dmd_patients_first_visit, dmd_patients_second_visit)
+hc_patients_visits <- rbind(hc_patients_first_visit, hc_patients_second_visit)
 
-#plot(all_patients$Age, all_patients$TBV, col = all_patients$group, pch = 19, xlab = "Age", ylab = "TBV", main = "Scatterplot of brain volume on the y-axis and the age on the x-axis")
-#Now make this scatterplot with ggplot instead
-test <- ggplot(all_patients, aes(x = Age, y = TBV, color = group)) +
-  geom_point(
-    na.rm = TRUE,
-  ) +
-  labs(title = "Scatterplot of brain volume on the y-axis and the age on the x-axis",
-       x = "Age",
-       y = "TBV",
+# Create the scatter plot
+test <- ggplot() +
+  # Plot DMD patients
+  geom_point(data = dmd_patients_first_visit, aes(x = Age, y = TBV, color = "red"), size = 2, shape = 16) +
+  # maybe another shape for the second visit instead of a point. How about a square?
+  geom_point(data = dmd_patients_second_visit, aes(x = Age, y = TBV, color = "red"), size = 2, shape = 17) +
+  ### Now draw a geom line from the first visit to the second visit
+  geom_line(data = dmd_patients_visits, aes(x = Age, y = TBV, group = ID), color = "red", linetype = "dashed") +
+  # Add smoothed line
+  geom_smooth(method = "lm", se = FALSE, linetype = "solid") +
+
+  
+  # Plot HC patients
+ #geom_line(data = dmd_patients_visits, aes(x = Age, y = TBV, group = ID), color = "red", linetype = "dashed") +
+  
+  # # Plot HC patients
+  # geom_point(data = hc_patients_first_visit, aes(x = Age, y = TBV, color = group), size = 2) +
+  # geom_point(data = hc_patients_second_visit, aes(x = Age, y = TBV, color = group), size = 2) +
+  # geom_line(data = hc_patients_visits, aes(x = Age, y = TBV, group = ID), color = "blue", linetype = "dashed") +
+  
+  # Labels and Theme
+  labs(title = "Brain Volume (TBV) vs Age",
+       x = "Age (years)",
+       y = "Total Brain Volume in cm^3 (TBV)",
        color = "Group") +
-  theme(plot.title = element_text(hjust = 0.5)) +
-  scale_color_manual(values = c("blue", "red")) +
-  geom_smooth(method = "lm", se = FALSE, color = "green") +
-  theme_minimal()
+  scale_color_manual(values = c("red" = "red", "blue" = "blue")) +
+  theme_classic()
 
+
+# #plot(all_patients$Age, all_patients$TBV, col = all_patients$group, pch = 19, xlab = "Age", ylab = "TBV", main = "Scatterplot of brain volume on the y-axis and the age on the x-axis")
+# test <- ggplot(all_patients, aes(x = Age, y = TBV, color = group)) +
+#   geom_point(
+#     na.rm = TRUE,
+#   ) +
+#   labs(title = "Scatterplot of brain volume on the y-axis and the age on the x-axis",
+#        x = "Age",
+#        y = "TBV",
+#        color = "Group") +
+#   theme(plot.title = element_text(hjust = 0.5)) +
+#   scale_color_manual(values = c("blue", "red")) +
+#   geom_smooth(method = "lm", se = FALSE, color = "green") +
+#   theme_minimal()
 
 # Save the plot to a file
 ggsave("scatter_plot.png", plot = test)
