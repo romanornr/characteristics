@@ -256,27 +256,6 @@ message("HC kids in UK with missing data:", nrow(hc_kids_uk_missing), "\n")
 # # Not draw a line from one close dot to another close dot
 # # It should connect the dots of the same patient
 
-# # Create the scatter plot
-# test <- ggplot() +
-#   # Plot DMD patients
-#   geom_point(data = all_dmd_patients_first_visit, aes(x = Age, y = TBV, color = group), size = 2) +
-#   geom_point(data = all_dmd_patients_second_visit, aes(x = Age, y = TBV, color = group), size = 2) +
-#   geom_line(data = dmd_patients_visits, aes(x = Age, y = TBV, group = ID), color = "red", linetype = "dashed") +
-  
-#   # Plot HC patients
-#   geom_point(data = all_hc_patients_first_visit, aes(x = Age, y = TBV, color = group), size = 2) +
-#   geom_point(data = all_hc_patients_second_visit, aes(x = Age, y = TBV, color = group), size = 2) +
-#   geom_line(data = hc_patients_visits, aes(x = Age, y = TBV, group = ID), color = "blue", linetype = "dashed") +
-  
-#   # Labels and Theme
-#   labs(title = "Brain Volume (TBV) vs Age",
-#        x = "Age (years)",
-#        y = "Total Brain Volume (TBV)",
-#        color = "Group") +
-#   scale_color_manual(values = c("red" = "red", "blue" = "blue")) +
-#   theme_minimal()
-
-
 
 # Example data for DMD patients and healthy controls
 hc_patients_first_visit <- data.frame(
@@ -326,23 +305,12 @@ hc_patients_visits <- rbind(hc_patients_first_visit, hc_patients_second_visit)
 
 # Create the scatter plot
 test <- ggplot() +
-  # # # Plot DMD patients
-  # geom_point(data = dmd_patients_first_visit, aes(x = Age, y = TBV, color = "red"), size = 2, shape = 16) +
-  # # maybe another shape for the second visit instead of a point. How about a square?
-  # geom_point(data = dmd_patients_second_visit, aes(x = Age, y = TBV, color = "red"), size = 2, shape = 17) +
-  # ### Now draw a geom line from the first visit to the second visit
-  # geom_line(data = dmd_patients_visits, aes(x = Age, y = TBV, group = ID), color = "red", linetype = "dashed") +
-  # # Add smoothed line
-  # #geom_smooth(method = "lm", se = FALSE, linetype = "solid") +
-
-
   geom_point(data = dmd_patients_first_visit, aes(x = Age, y = TBV, color = group), size = 2, shape = 16) +
   geom_point(data = dmd_patients_second_visit, aes(x = Age, y = TBV, color = group), size = 2, shape = 17) +
   geom_line(data = dmd_patients_visits, aes(x = Age, y = TBV, group = ID, color = group), linetype = "dashed") +
   
-
   # Plot HC patients
- #geom_line(data = dmd_patients_visits, aes(x = Age, y = TBV, group = ID), color = "red", linetype = "dashed") +
+  #geom_line(data = dmd_patients_visits, aes(x = Age, y = TBV, group = ID), color = "red", linetype = "dashed") +
   
   # # Plot HC patients
   # geom_point(data = hc_patients_first_visit, aes(x = Age, y = TBV, color = group), size = 2) +
@@ -378,42 +346,3 @@ ggsave("scatter_plot.png", plot = test)
 
 #ggplot(data = all_patients)
 #print(all_patients)
-
-
-# # Change the point colors and shapes
-# # Change the line type and color
-# ggplot(all_patients, aes(x=Age, y=TBV)) + 
-#   geom_point(shape=18, color="blue")+
-#   geom_smooth(method=lm, se=FALSE, linetype="dashed",
-#              color="darkred")
-# # Change the confidence interval fill color
-# ggplot(all_patients, aes(x=Age, y=TBV)) + 
-#   geom_point(shape=18, color="blue")+
-#   geom_smooth(method=lm,  linetype="dashed",
-#              color="darkred", fill="blue")
-
-
-
-# ggplot2::ggplot(all_patients, aes(x = Age, y = TBV, color = group)) +
-#   ggplot2::geom_point(
-#     na.rm = TRUE,
-#   ) +
-#   ggplot2::labs(title = "Scatterplot of brain volume on the y-axis and the age on the x-axis",
-#                 x = "Age",
-#                 y = "TBV",
-#                 color = "Group") +
-#                 ggplot2::theme(plot.title = element_text(hjust = 0.5)) +
-#                 ggplot2::scale_color_manual(values = c("blue", "red")) +
-#                 ggplot2::geom_smooth(method = "lm", se = FALSE, color = "black") +
-#                 ggplot2::theme_minimal()
-
-# ggplot2::ggplot(all_patients, aes(x = Age, y = TBV, color = group)) +
-#   ggplot2::geom_point() +
-#   ggplot2::labs(title = "Scatterplot of brain volume on the y-axis and the age on the x-axis",
-#                 x = "Age",
-#                 y = "TBV",
-#                 color = "Group") +
-#                 ggplot2::theme(plot.title = element_text(hjust = 0.5)) +
-#                 ggplot2::scale_color_manual(values = c("blue", "red")) +
-#                 ##ggplot2::geom_smooth(method = "lm", se = FALSE, color = "black") +
-#                 ggplot2::theme_minimal()
