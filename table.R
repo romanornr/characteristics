@@ -302,7 +302,7 @@ dmd_patients_first_visit <- data.frame(
   Age = c(10, 11, 12, 13, 14, 15),
   TBV = c(5000, 6000, 7000, 8000, 9000, 10000),
   Visit = c(1, 1, 1, 1, 1, 1),
-  group = "red"
+  group = "DMD"
 )
 
 dmd_patients_second_visit <- data.frame(
@@ -310,7 +310,7 @@ dmd_patients_second_visit <- data.frame(
   Age = c(20, 21, 22, 33, 34, 40),
   TBV = c(4000, 5000, 6000, 7000, 8000, 9000),
   Visit = c(1, 2, 2, 2, 2, 2),
-  group = "red"
+  group = "DMD"
 )
 
 
@@ -320,18 +320,27 @@ dmd_patients_second_visit <- data.frame(
 dmd_patients_visits <- rbind(dmd_patients_first_visit, dmd_patients_second_visit)
 hc_patients_visits <- rbind(hc_patients_first_visit, hc_patients_second_visit)
 
+# Combine first and second visit data for plotting lines
+dmd_patients_visits <- rbind(dmd_patients_first_visit, dmd_patients_second_visit)
+hc_patients_visits <- rbind(hc_patients_first_visit, hc_patients_second_visit)
+
 # Create the scatter plot
 test <- ggplot() +
-  # Plot DMD patients
-  geom_point(data = dmd_patients_first_visit, aes(x = Age, y = TBV, color = "red"), size = 2, shape = 16) +
-  # maybe another shape for the second visit instead of a point. How about a square?
-  geom_point(data = dmd_patients_second_visit, aes(x = Age, y = TBV, color = "red"), size = 2, shape = 17) +
-  ### Now draw a geom line from the first visit to the second visit
-  geom_line(data = dmd_patients_visits, aes(x = Age, y = TBV, group = ID), color = "red", linetype = "dashed") +
-  # Add smoothed line
-  geom_smooth(method = "lm", se = FALSE, linetype = "solid") +
+  # # # Plot DMD patients
+  # geom_point(data = dmd_patients_first_visit, aes(x = Age, y = TBV, color = "red"), size = 2, shape = 16) +
+  # # maybe another shape for the second visit instead of a point. How about a square?
+  # geom_point(data = dmd_patients_second_visit, aes(x = Age, y = TBV, color = "red"), size = 2, shape = 17) +
+  # ### Now draw a geom line from the first visit to the second visit
+  # geom_line(data = dmd_patients_visits, aes(x = Age, y = TBV, group = ID), color = "red", linetype = "dashed") +
+  # # Add smoothed line
+  # #geom_smooth(method = "lm", se = FALSE, linetype = "solid") +
 
+
+  geom_point(data = dmd_patients_first_visit, aes(x = Age, y = TBV, color = group), size = 2, shape = 16) +
+  geom_point(data = dmd_patients_second_visit, aes(x = Age, y = TBV, color = group), size = 2, shape = 17) +
+  geom_line(data = dmd_patients_visits, aes(x = Age, y = TBV, group = ID, color = group), linetype = "dashed") +
   
+
   # Plot HC patients
  #geom_line(data = dmd_patients_visits, aes(x = Age, y = TBV, group = ID), color = "red", linetype = "dashed") +
   
@@ -345,23 +354,8 @@ test <- ggplot() +
        x = "Age (years)",
        y = "Total Brain Volume in cm^3 (TBV)",
        color = "Group") +
-  scale_color_manual(values = c("red" = "red", "blue" = "blue")) +
+  scale_color_manual(values = c("DMD" = "red", "blue" = "blue")) +
   theme_classic()
-
-
-# #plot(all_patients$Age, all_patients$TBV, col = all_patients$group, pch = 19, xlab = "Age", ylab = "TBV", main = "Scatterplot of brain volume on the y-axis and the age on the x-axis")
-# test <- ggplot(all_patients, aes(x = Age, y = TBV, color = group)) +
-#   geom_point(
-#     na.rm = TRUE,
-#   ) +
-#   labs(title = "Scatterplot of brain volume on the y-axis and the age on the x-axis",
-#        x = "Age",
-#        y = "TBV",
-#        color = "Group") +
-#   theme(plot.title = element_text(hjust = 0.5)) +
-#   scale_color_manual(values = c("blue", "red")) +
-#   geom_smooth(method = "lm", se = FALSE, color = "green") +
-#   theme_minimal()
 
 # Save the plot to a file
 ggsave("scatter_plot.png", plot = test)
