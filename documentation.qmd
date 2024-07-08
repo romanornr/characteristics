@@ -8,29 +8,29 @@ editor: visual
 
 This document outlines the steps taken to analyze a dataset containing information about Muscle Dystrophy (DMD) patients and Healthy Controls (HC)
 
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this (example):
-
-```{r}
-1 + 1
-```
-
 ### import data & libraries
 
 We begin by importing the necessary libraries and loading our dataset.
 
-```{r}
+```{r,  warning=FALSE, message=FALSE}
 library(readxl)
 library(dplyr)
 library(ggplot2)
+library(DT)
 
 file_path <- "DATASET_V2_RG.xlsx"
 if (!file.exists(file_path)) stop("File does not exist")
 dataset <- read_excel(file_path)
-
-print(dataset)
 ```
+
+### Showing interactive table with DT package
+
+We also install the DT package to create interactive tables by opening R and run the following command: `install.packages("DT")`
+```{r}
+datatable(dataset, 
+          options = list(pageLength = 5, scrollX = TRUE))
+```
+
 
 ### Handling missing values
 
@@ -60,34 +60,94 @@ We'll create subsets of our dataset based on the Disease column to separate DMD 
 dmd <- dataset[dataset$Disease == 1, ]
 hc <- dataset[dataset$Disease == 0, ]
 
-message("DMD group amount of patients: ", nrow(dmd), "\n")
-message("HC group amount of patients: ", nrow(hc), "\n")
-
 dmd <- replace_values_with_na_mutate(dmd, rules)
 hc <- replace_values_with_na_mutate(hc, rules)
 ```
+
+::: {.panel-tabset .nav-pills}
+
+### DMD
+
+```{r}
+message("DMD group amount of patients: ", nrow(dmd), "\n")
+```
+
+### HC
+```{r}
+message("HC group amount of patients: ", nrow(hc), "\n")
+```
+
+:::
 
 ### Patients Demographics
 
 To further analyse the data and get a better understanding of the patients demographics, we create a subset of the DMD and HC groups to futher categorize patients based on their country and if they're adults or children.
 
-So we will further subset the DMD and HC groups based on patiend ID to distinguish adults, kids and the country they're from. Which in this case can be either the Netherlands or UK
+So we will further subset the DMD and HC groups based on patiend ID to distinguish adults, kids and the country they're from. Which in this case can be either the Netherlands or UK.
+We can count the amount of patients in each group with the nrow() function.
 
 ```{r}
+# Subset kids patients
 dmd_adults_nl <- dmd[grepl("^DMDBA", dmd$ID), ]
 dmd_kids_nl <- dmd[grepl("^DMDBNL", dmd$ID), ]
 dmd_kids_uk <- dmd[grepl("^DMDBUK", dmd$ID), ]
-
-message("DMD amount of adults:", nrow(dmd_adults_nl))
-message("DMD amount of NL kids:", nrow(dmd_kids_nl))
-message("DMD amount of UK kids:", nrow(dmd_kids_uk), "\n")
 
 # Subset HC patients
 hc_adults_nl <- hc[grepl("^DMDBA", hc$ID), ]
 hc_kids_nl <- hc[grepl("^DMDBNL", hc$ID), ]
 hc_kids_uk <- hc[grepl("^DMDBUK", hc$ID), ]
 
-message("HC amount of adults:", nrow(hc_adults_nl))
+```
+
+::: {.panel-tabset .nav-pills}
+### DMD
+```{r}
+message("DMD amount of NL adults:", nrow(dmd_adults_nl))
+message("DMD amount of NL kids:", nrow(dmd_kids_nl))
+message("DMD amount of UK kids:", nrow(dmd_kids_uk), "\n")
+```
+
+### HC
+```{r}
+message("HC amount of NL adults:", nrow(hc_adults_nl))
 message("HC amount of NL kids:", nrow(hc_kids_nl))
 message("HC amount of UK kids:", nrow(hc_kids_uk), "\n")
 ```
+
+
+### kids
+
+```{r}
+message("DMD amount of NL kids:", nrow(dmd_kids_nl))
+message("DMD amount of UK kids:", nrow(dmd_kids_uk), "\n")
+
+```
+
+### Adults
+
+```{r}
+message("HC amount of NL adults:", nrow(hc_adults_nl))
+message("HC amount of NL kids:", nrow(hc_kids_nl))
+message("HC amount of UK kids:", nrow(hc_kids_uk), "\n")
+```
+
+### Netherlands
+```{r}
+message("DMD amount of NL adults:", nrow(dmd_adults_nl))
+message("DMD amount of NL kids:", nrow(dmd_kids_nl))
+message("HC amount of NL adults:", nrow(hc_adults_nl))
+message("HC amount of NL kids:", nrow(hc_kids_nl))
+
+```
+
+### UK
+```{r}
+message("DMD amount of UK kids:", nrow(dmd_kids_uk))
+message("HC amount of UK kids:", nrow(hc_kids_uk))
+
+```
+
+:::
+
+
+
