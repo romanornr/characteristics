@@ -8,6 +8,8 @@ editor: visual
 
 This document outlines the steps taken to analyze a dataset containing information about Muscle Dystrophy (DMD) patients and Healthy Controls (HC)
 
+------------------------------------------------------------------------
+
 ### import data & libraries
 
 We begin by importing the necessary libraries and loading our dataset.
