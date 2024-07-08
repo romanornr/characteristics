@@ -231,9 +231,9 @@ message("HC kids in UK with missing data:", nrow(hc_kids_uk_missing), "\n")
 # # Plot of brain volume on the y-axis and the age on the x-axis
 # # healthy controls are in blue and the DMD patients are in red
 # # TBV column is the total brain volume
-# dmd_patients <- rbind(dmd_adults_nl, dmd_kids_nl, dmd_kids_uk) %>% mutate(group = "red")
-# hc_patients <- rbind(hc_adults_nl, hc_kids_nl, hc_kids_uk) %>% mutate(group = "blue")
-# all_patients <- replace_values_with_na_mutate(rbind(dmd_patients, hc_patients), rules)
+dmd_patients <- rbind(dmd_adults_nl, dmd_kids_nl, dmd_kids_uk) # %>% mutate(group = "red")
+hc_patients <- rbind(hc_adults_nl, hc_kids_nl, hc_kids_uk) # %>% mutate(group = "blue")
+all_patients <- replace_values_with_na_mutate(rbind(dmd_patients, hc_patients), rules)
 
 # all_dmd_patients_first_visit <- dmd_patients %>% filter(Visit == 1)
 # all_dmd_patients_second_visit <- dmd_patients %>% filter(Visit == 2)
@@ -274,8 +274,6 @@ hc_patients_second_visit <- data.frame(
   group = "blue"
 )
 
-
-
 dmd_patients_first_visit <- data.frame(
   ID = c(1, 2, 3, 4, 5, 6),
   Age = c(10, 11, 12, 13, 14, 15),
@@ -291,9 +289,6 @@ dmd_patients_second_visit <- data.frame(
   Visit = c(1, 2, 2, 2, 2, 2),
   group = "DMD"
 )
-
-
-
 
 # Combine first and second visit data for plotting lines
 dmd_patients_visits <- rbind(dmd_patients_first_visit, dmd_patients_second_visit)
@@ -326,7 +321,38 @@ test <- ggplot() +
   theme_classic()
 
 # Save the plot to a file
-ggsave("scatter_plot.png", plot = test)
+#ggsave("scatter_plot.png", plot = test)
+
+
+# GLM model to predict the brain volume based on the age and group
+# y = B0 + B1 * x1 + B2 * x2 + B3 * x1 * x2
+# y = B0 + B1 * x1 + B2 * x2 + B3 * Bn * Xn + e
+# B1 * x1 is the central determinent of the model
+# B2 * x2 are the covariants of the model
+model <- lm(TBV ~ Age, data = dmd)
+model2 <- lm(TBV ~ Age, data = hc)
+print(summary(model))
+print(summary(model2))
+
+
+clean_data <- all_patients[is.finite(all_patients$Age) & is.finite(all_patients$TBV), ]
+plot(clean_data$Age, clean_data$TBV, xlab = "Age", ylab = "TBV cm^3",
+pch = 20, col = "grey35")
+abline(lm(TBV ~ Age, data = clean_data), col = "red")
+lines(lowess(clean_data$Age, clean_data$TBV), col = "blue", lty = "longdash")
+
+# # plot scatterplot with linear regression line
+# z <- ggplot(data = hc, aes(x = Age, y = TBV)) +
+#   geom_point() +
+#   geom_smooth(method = "lm", se = FALSE, color = "black") +
+#   labs(title = "Scatterplot of brain volume on the y-axis and the age on x-axis",
+#        x = "Age",
+#        y = "TBV") +
+#   theme_classic()
+
+# ggsave("scatterplotttttttt.png", plot = z)
+
+#model <- lm(TBV ~ Age + group, data = dataset)
 
 
 # # Now make it a scatterplot 

@@ -4,29 +4,26 @@ format: html
 editor: visual
 ---
 
-## Quarto
+## Introduction
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+This document outlines the steps taken to analyze a dataset containing information about Muscle Dystrophy (DMD) patients and Healthy Controls (HC)
 
 ## Running Code
 
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this (example):
 
 ```{r}
 1 + 1
 ```
 
-You can add options to executable code like this
+### import data & libraries
 
-```{r}
-#| echo: false
-2 * 2
-```
-
-import data
+We begin by importing the necessary libraries and loading our dataset.
 
 ```{r}
 library(readxl)
+library(dplyr)
+library(ggplot2)
 
 file_path <- "DATASET_V2_RG.xlsx"
 if (!file.exists(file_path)) stop("File does not exist")
@@ -35,11 +32,62 @@ dataset <- read_excel(file_path)
 print(dataset)
 ```
 
-Next step
+### Handling missing values
+
+We define a function to replace specific values with NA based on predefined rules and apply these rules to our dataset. The rules list can always be expended without changing the function.
 
 ```{r}
-print("Next step")
+replace_values_with_na_mutate <- function(df, rules) {
+  df %>%
+    mutate(across(
+      .cols = names(rules),
+      .fns = ~ if_else(. %in% rules[[cur_column()]], NA_real_, .)
+    ))
+}
 
+rules <- list(
+  Age = c(9999),
+  TBV = c(9999)
+)
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+### Subset data
+
+We'll create subsets of our dataset based on the Disease column to separate DMD (patients with disease) and HC (healthy control patients). We also handle the missing values with the `replace_values_with_na_mutate` function based on our defined rules.
+
+```{r}
+
+dmd <- dataset[dataset$Disease == 1, ]
+hc <- dataset[dataset$Disease == 0, ]
+
+message("DMD group amount of patients: ", nrow(dmd), "\n")
+message("HC group amount of patients: ", nrow(hc), "\n")
+
+dmd <- replace_values_with_na_mutate(dmd, rules)
+hc <- replace_values_with_na_mutate(hc, rules)
+```
+
+### Patients Demographics
+
+To further analyse the data and get a better understanding of the patients demographics, we create a subset of the DMD and HC groups to futher categorize patients based on their country and if they're adults or children.
+
+So we will further subset the DMD and HC groups based on patiend ID to distinguish adults, kids and the country they're from. Which in this case can be either the Netherlands or UK
+
+```{r}
+dmd_adults_nl <- dmd[grepl("^DMDBA", dmd$ID), ]
+dmd_kids_nl <- dmd[grepl("^DMDBNL", dmd$ID), ]
+dmd_kids_uk <- dmd[grepl("^DMDBUK", dmd$ID), ]
+
+message("DMD amount of adults:", nrow(dmd_adults_nl))
+message("DMD amount of NL kids:", nrow(dmd_kids_nl))
+message("DMD amount of UK kids:", nrow(dmd_kids_uk), "\n")
+
+# Subset HC patients
+hc_adults_nl <- hc[grepl("^DMDBA", hc$ID), ]
+hc_kids_nl <- hc[grepl("^DMDBNL", hc$ID), ]
+hc_kids_uk <- hc[grepl("^DMDBUK", hc$ID), ]
+
+message("HC amount of adults:", nrow(hc_adults_nl))
+message("HC amount of NL kids:", nrow(hc_kids_nl))
+message("HC amount of UK kids:", nrow(hc_kids_uk), "\n")
+```
