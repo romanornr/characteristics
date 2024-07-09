@@ -82,7 +82,9 @@ message("Mean age of HC:", mean_age_hc, "\n")
 dmd_kids <- rbind(dmd_kids_nl, dmd_kids_uk)
 hc_kids <- rbind(hc_kids_nl, hc_kids_uk)
 
-
+### Combine adults from NL and UK
+dmd_adults <- rbind(dmd_adults_nl, hc_adults_nl)
+hc_adults <- rbind(hc_adults_nl)
 
 
 #################################### Descriptive Statistics   #########################
@@ -172,39 +174,86 @@ message("SD of HC adults in NL:", hc_adults_nl_age)
 message("SD of HC kids in NL:", hc_kids_nl_age)
 message("SD of HC kids in UK:", hc_kids_uk_age, "\n")
 
+################### TBV ####################
 
+### Mean TBV of DMD and HC patients
+message("Mean TBV of DMD kids:", round(mean(dmd_kids$TBV, na.rm = TRUE), 1))
+message("Mean TBV of DMD adults:", round(mean(dmd_adults$TBV, na.rm = TRUE), 1))
+message("Mean TBV of HC adults:", round(mean(hc_adults$TBV, na.rm = TRUE), 1))
+message("Mean TBV of HC kids:", round(mean(hc_kids$TBV, na.rm = TRUE), 1), "\n")
+
+
+### standard deviation of TBV of DMD and HC patients
+message("SD of TBV of DMD kids:", round(sd(dmd_kids$TBV, na.rm = TRUE), 1))
+message("SD of TBV of DMD adults:", round(sd(dmd_adults$TBV, na.rm = TRUE), 1))
+message("SD of TBV of HC adults:", round(sd(hc_adults$TBV, na.rm = TRUE), 1))
+message("SD of TBV of HC kids:", round(sd(hc_kids$TBV, na.rm = TRUE), 1), "\n")
+
+
+
+print(shapiro.test(dmd_kids$TBV))
+print(shapiro.test(hc_kids$TBV))
+
+print(shapiro.test(dmd_adults$TBV))
+print(shapiro.test(hc_adults$TBV))
+
+# TBV distribution of DMD and HC patients
+par(mfrow = c(1, 4))
+hist(dmd_kids$TBV, main = "TBV of DMD kids", xlab = "TBV", col = "red", breaks = 20)
+hist(hc_kids$TBV, main = "TBV of HC kids", xlab = "TBV", col = "blue", breaks = 20)
+hist(hc_adults$TBV, main = "TBV of HC adults", xlab = "TBV", col = "blue", breaks = 20)
+hist(dmd_adults$TBV, main = "TBV of DMD adults", xlab = "TBV", col = "red", breaks = 20)
+
+# qqplot 
+par(mfrow = c(1, 4))
+qqnorm(dmd_kids$TBV, main = "DMD kids TBV"); qqline(dmd_kids$TBV)
+qqnorm(hc_kids$TBV, main = "HC kids TBV"); qqline(hc_kids$TBV)
+qqnorm(hc_adults$TBV, main = "HC adults TBV"); qqline(hc_adults$TBV)
+qqnorm(dmd_adults$TBV, main = "DMD adults TBV"); qqline(dmd_adults$TBV)
+
+par(mfrow = c(1, 4))
+boxplot(dmd_kids$TBV, ylab = "TBV", main = "DMD kids TBV", col = "red")
+boxplot(hc_kids$TBV, ylab = "TBV", main = "HC kids TBV", col = "blue")
+boxplot(dmd_adults$TBV, ylab = "TBV", main = "DMD adults TBV", col = "red")
+boxplot(hc_adults$TBV, ylab = "TBV", main = "HC adults TBV", col = "blue")
+
+
+
+
+
+###### end TBV ####################
 # Create histograms, Q-Q plots and boxplots for the age of DMD and HC patients
 par(mfrow = c(1, 3))
-hist(dmd_adults_nl$Age, main = "Age distribution of DMD adults patients", xlab = "Age", col = "blue", breaks = 20)
-hist(dmd_kids_nl$Age, main = "Age distribution of DMD kids patients in NL", xlab = "Age", col = "red", breaks = 20)
-hist(dmd_kids_uk$Age, main = "Age distribution of DMD kids patients in UK", xlab = "Age", col = "green", breaks = 20)
+hist(dmd_adults_nl$Age, main = "DMD adults in NL", xlab = "Age", col = "blue", breaks = 20)
+hist(dmd_kids_nl$Age, main = "DMD kids in NL", xlab = "Age", col = "red", breaks = 20)
+hist(dmd_kids_uk$Age, main = "DMD kids patients in UK", xlab = "Age", col = "green", breaks = 20)
 
-hist(hc_adults_nl$Age, main = "Age distribution of HC adults patients in NL", xlab = "Age", col = "blue", breaks = 20)
-hist(hc_kids_nl$Age, main = "Age distribution of HC kids patients in NL", xlab = "Age", col = "red", breaks = 20)
-hist(hc_kids_uk$Age, main = "Age distribution of HC kids patients in UK", xlab = "Age", col = "green", breaks = 20)
+hist(hc_adults_nl$Age, main = "HC adults in NL", xlab = "Age", col = "blue", breaks = 20)
+hist(hc_kids_nl$Age, main = "HC kids in NL", xlab = "Age", col = "red", breaks = 20)
+hist(hc_kids_uk$Age, main = "HC kids in UK", xlab = "Age", col = "green", breaks = 20)
 
 
 # Create Q-Q plots for the age of DMD and HC patients
 par(mfrow = c(1, 3))
-qqnorm(dmd_adults_nl$Age, main = "Q-Q plot of DMD adults patients in NL"); qqline(dmd_adults_nl$Age)
-qqnorm(dmd_kids_nl$Age, main = "Q-Q plot of DMD kids patients in NL"); qqline(dmd_kids_nl$Age)
-qqnorm(dmd_kids_uk$Age, main = "Q-Q plot of DMD kids patients in UK"); qqline(dmd_kids_uk$Age)
+qqnorm(dmd_adults_nl$Age, main = "DMD adults in NL"); qqline(dmd_adults_nl$Age)
+qqnorm(dmd_kids_nl$Age, main = "DMD kids in NL"); qqline(dmd_kids_nl$Age)
+qqnorm(dmd_kids_uk$Age, main = "DMD kids in UK"); qqline(dmd_kids_uk$Age)
 
-qqnorm(hc_adults_nl$Age, main = "Q-Q plot of HC adults patients in NL"); qqline(hc_adults_nl$Age)
-qqnorm(hc_kids_nl$Age, main = "Q-Q plot of HC kids patients in NL"); qqline(hc_kids_nl$Age)
-qqnorm(hc_kids_uk$Age, main = "Q-Q plot of HC kids patients in UK"); qqline(hc_kids_uk$Age)
+qqnorm(hc_adults_nl$Age, main = "HC adults in NL"); qqline(hc_adults_nl$Age)
+qqnorm(hc_kids_nl$Age, main = "HC kids in NL"); qqline(hc_kids_nl$Age)
+qqnorm(hc_kids_uk$Age, main = "HC kids in UK"); qqline(hc_kids_uk$Age)
 
 
 # boxplot of the age of DMD and HC patients
 par(mfrow = c(1, 3))
-boxplot(dmd_adults_nl$Age, ylab = "age", main = "Boxplot of DMD adults patients in NL", col = "blue")
-boxplot(dmd_kids_nl$Age, main = "Boxplot of DMD kids patients in NL", col = "red")
-boxplot(dmd_kids_uk$Age, main = "Boxplot of DMD kids patients in UK", col = "green")
+boxplot(dmd_adults_nl$Age, ylab = "age", main = "DMD adults in NL", col = "blue")
+boxplot(dmd_kids_nl$Age, main = "DMD kids patients in NL", col = "red")
+boxplot(dmd_kids_uk$Age, main = "DMD kids patients in UK", col = "green")
 
 par(mfrow = c(1, 3))
-boxplot(hc_adults_nl$Age, ylab= "age", main = "Boxplot of HC adults patients in NL", col = "blue")
-boxplot(hc_kids_nl$Age, main = "Boxplot of HC kids patients in NL", col = "red")
-boxplot(hc_kids_uk$Age, main = "Boxplot of HC kids patients in UK", col = "green")
+boxplot(hc_adults_nl$Age, ylab= "age", main = "HC adults in NL", col = "blue")
+boxplot(hc_kids_nl$Age, main = "HC kids patients in NL", col = "red")
+boxplot(hc_kids_uk$Age, main = "HC kids patients in UK", col = "green")
 
 
 # Perform Shapiro-Wilk normality test for the age of DMD and HC patients
@@ -415,7 +464,7 @@ test <- ggplot() +
   theme_classic()
 
 # Save the plot to a file
-#ggsave("scatter_plot.png", plot = test)
+ggsave("scatter_plot_final.png", plot = test)
 
 
 
