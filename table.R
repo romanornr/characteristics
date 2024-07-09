@@ -1,9 +1,9 @@
 library(readxl)
 library(dplyr)
 library(ggplot2)
+library(car)
 
-
-file_path <- "DATASET_V2_RG.xlsx"
+file_path <- "DATASET_V2_SMO.xlsx"
 if (!file.exists(file_path)) stop("File does not exist")
 dataset <- read_excel(file_path)
 
@@ -77,6 +77,51 @@ message("Mean age of DMD:", mean_dmd_age)
 message("Mean age of HC:", mean_age_hc, "\n")
 
 
+
+### Combine kids from NL and UK
+dmd_kids <- rbind(dmd_kids_nl, dmd_kids_uk)
+hc_kids <- rbind(hc_kids_nl, hc_kids_uk)
+
+
+
+
+#################################### Descriptive Statistics   #########################
+
+all_patients <- rbind(dmd, hc)
+clean_data <- all_patients[is.finite(all_patients$Age) & is.finite(all_patients$TBV), ]
+mo <- lm(TBV ~ Age, data = clean_data)
+plot(all_patients$Age, all_patients$TBV, xlab = "Age", ylab = "TBV cm^3", pch = 20, col = "grey35")
+
+
+# GLM model to predict the brain volume based on the age and group
+# y = B0 + B1 * x1 + B2 * x2 + B3 * x1 * x2
+# y = B0 + B1 * x1 + B2 * x2 + B3 * Bn * Xn + e
+# B1 * x1 is the central determinent of the model
+# B2 * x2 are the covariants of the model
+model <- lm(TBV ~ Age, data = dmd)
+model2 <- lm(TBV ~ Age, data = hc)
+print(summary(model))
+print(summary(model2))
+
+
+
+plot(clean_data$Age, clean_data$TBV, xlab = "Age", ylab = "TBV cm^3",
+pch = 20, col = "grey35")
+abline(lm(TBV ~ Age, data = clean_data), col = "red")
+lines(lowess(clean_data$Age, clean_data$TBV), col = "blue", lty = "longdash")
+
+######################
+
+
+
+
+# Calculate mean of the age of DMD kids and HC kids in the combined kids dataset
+mean_dmd_kids_age <- round(mean(dmd_kids$Age, na.rm = TRUE), 1)
+mean_hc_kids_age <- round(mean(hc_kids$Age, na.rm = TRUE), 1)
+
+message("Mean age of DMD kids:", mean_dmd_kids_age)
+message("Mean age of HC kids:", mean_hc_kids_age, "\n")
+
 # Calculate mean of the age of DMD and HC patients in the Netherlands and UK
 mean_dmd_adults_nl_age <- round(mean(dmd_adults_nl$Age, na.rm = TRUE), 1)
 mean_dmd_kids_nl_age <- round(mean(dmd_kids_nl$Age, na.rm = TRUE), 1)
@@ -93,6 +138,14 @@ mean_hc_kids_uk_age <- round(mean(hc_kids_uk$Age, na.rm = TRUE), 1)
 message("Mean age of HC adults in NL:", mean_hc_adults_nl_age)
 message("Mean age of HC kids in NL:", mean_hc_kids_nl_age)
 message("Mean age of HC kids in UK:", mean_hc_kids_uk_age, "\n")
+
+
+# calculate the standard deviation of dmd kids and hc kids
+sd_dmd_kids_age <- round(sd(dmd_kids$Age, na.rm = TRUE), 1)
+sd_hc_kids_age <- round(sd(hc_kids$Age, na.rm = TRUE), 1)
+
+message("SD of DMD kids age:", sd_dmd_kids_age)
+message("SD of HC kids age:", sd_hc_kids_age, "\n")
 
 # Calculate the standart deviation of the age of DMD and HC patients
 sd_dmd_age <- round(sd(dmd$Age, na.rm = TRUE), 1)
@@ -173,6 +226,47 @@ print(hc_kids_nl_shapiro)
 
 hc_kids_uk_shapiro <- shapiro.test(hc_kids_uk$Age)
 print(hc_kids_uk_shapiro)
+
+
+# I run 2 Levene's tests to check if the variances of the age of DMD and HC patients are equal
+# But can the levene test compare dmd_kids_combined against hc_kids_combined in variance
+
+
+###
+### leveneTest
+#########################################
+
+# # Method 1
+# dmd_kids_combined <- rbind(
+#   transform(dmd_kids_nl, group = "NL"),
+#   transform(dmd_kids_uk, group = "UK")
+# )
+
+# hc_kids_combined <- rbind(
+#   transform(hc_kids_nl, group = "NL"),
+#   transform(hc_kids_uk, group = "UK")
+# )
+
+
+# method_1_result_1 <- leveneTest(Age ~ group, data = dmd_kids_combined)
+# method_1_result_2 <- leveneTest(Age ~ group, data = hc_kids_combined)
+
+# print(method_1_result_1)
+# print(method_1_result_2)
+
+
+print("####################################")
+
+# Method 2
+patients_lavene_test_group <- rbind(
+  transform(dmd_kids_nl, group = "DMD"),
+  transform(dmd_kids_uk, group = "DMD"),
+  transform(hc_kids_nl, group = "HC"),
+  transform(hc_kids_uk, group = "HC")
+)
+
+method_2_result <- leveneTest(Age ~ group, data = patients_lavene_test_group, na.rm = TRUE)
+print(method_2_result)
 
 
 # ScannerType
@@ -324,22 +418,7 @@ test <- ggplot() +
 #ggsave("scatter_plot.png", plot = test)
 
 
-# GLM model to predict the brain volume based on the age and group
-# y = B0 + B1 * x1 + B2 * x2 + B3 * x1 * x2
-# y = B0 + B1 * x1 + B2 * x2 + B3 * Bn * Xn + e
-# B1 * x1 is the central determinent of the model
-# B2 * x2 are the covariants of the model
-model <- lm(TBV ~ Age, data = dmd)
-model2 <- lm(TBV ~ Age, data = hc)
-print(summary(model))
-print(summary(model2))
 
-
-clean_data <- all_patients[is.finite(all_patients$Age) & is.finite(all_patients$TBV), ]
-plot(clean_data$Age, clean_data$TBV, xlab = "Age", ylab = "TBV cm^3",
-pch = 20, col = "grey35")
-abline(lm(TBV ~ Age, data = clean_data), col = "red")
-lines(lowess(clean_data$Age, clean_data$TBV), col = "blue", lty = "longdash")
 
 # # plot scatterplot with linear regression line
 # z <- ggplot(data = hc, aes(x = Age, y = TBV)) +
