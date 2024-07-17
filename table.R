@@ -3,7 +3,7 @@ library(dplyr)
 library(ggplot2)
 library(car)
 
-file_path <- "DATASET_V2_SMO.xlsx"
+file_path <- "DATASET_V3_SMO.xlsx"
 if (!file.exists(file_path)) stop("File does not exist")
 dataset <- read_excel(file_path)
 
@@ -24,23 +24,133 @@ replace_values_with_na_mutate <- function(df, rules) {
 
 rules <- list(
   Age = c(9999),
-  TBV = c(9999)
+  TBV = c(9999),
+  TBV_Ratio = c(9999)
 )
 
 # Create dmd and hc subsets
-# dmd <- dataset %>% filter(Disease == 1)
-# hc <- dataset %>% filter(Disease == 0)
-dmd <- dataset[dataset$Disease == 1, ]
-hc <- dataset[dataset$Disease == 0, ]
+dmd <- dataset %>% filter(Disease == 1)
+hc <- dataset %>% filter(Disease == 0)
+# dmd <- dataset[dataset$Disease == 1, ]
+# hc <- dataset[dataset$Disease == 0, ]
 
-message("DMD group amount of patients: ", nrow(dmd), "\n")
-message("HC group amount of patients: ", nrow(hc), "\n")
+
+
+# hc <- dataset[dataset$Disease == 0, ]
+
+# message("DMD group amount of patients: ", nrow(dmd), "\n")
+# message("HC group amount of patients: ", nrow(hc), "\n")
 
 # dmd$Age[dmd$Age == 9999] <- NA
 # hc$Age[hc$Age == 9999] <- NA
 
 dmd <- replace_values_with_na_mutate(dmd, rules)
 hc <- replace_values_with_na_mutate(hc, rules)
+
+
+dmd_first_visit <- dmd %>% filter(Visit == 1)
+dmd_second_visit <- dmd %>% filter(Visit == 2)
+hc_first_visit <- hc %>% filter(Visit == 1)
+hc_second_visit <- hc %>% filter(Visit == 2)
+
+# print(dmd_first_visit$ID)
+
+message("DMD second and first visit: ", nrow(dmd))
+message("HC second and first visit: ", nrow(hc))
+
+
+message("DMD first visit:", nrow(dmd_first_visit))
+message("DMD second visit:", nrow(dmd_second_visit), "\n")
+
+message("HC first visit:", nrow(hc_first_visit))
+message("HC second visit:", nrow(hc_second_visit), "\n")
+
+
+
+# Example data for DMD patients and healthy controls
+# test_hc_first_visit <- data.frame(
+#   ID = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11),
+#   Age = c(4, 6, 12, 14, 19, 21, 25, 27, 30, 32, 35),
+# )
+# Example data for DMD patients and healthy controls
+test_hc_first_visit <- data.frame(
+  ID = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11),
+  Age = c(4, 6, 12, 14, 19, 21, 25, 27, 30, 32, 35)
+)
+
+
+# categorize patients based on their age
+# 0 - 5 years old
+# 6 - 12 years old
+# 13 - 19 years old
+# 20 - 25 years old
+# 26+ years old
+test_hc_first_visit_ <- test_hc_first_visit %>%
+  mutate(
+    age_group = case_when(
+      Age <= 5 ~ "0 - 5 years old",
+      Age <= 12 ~ "6 - 12 years old",
+      Age <= 19 ~ "13 - 19 years old",
+      Age <= 25 ~ "20 - 25 years old",
+      TRUE ~ "26+ years old"
+    )
+  )
+
+
+
+# print(test_hc_first_visit_)
+# count how many 12 years old patients are in test_hc_first_visit_
+message("patients below 5 years old:", nrow(test_hc_first_visit_[test_hc_first_visit_$age_group == "0 - 5 years old", ]))
+message("6 - 12 years old patients:", nrow(test_hc_first_visit_[test_hc_first_visit_$age_group == "6 - 12 years old", ]))
+message("12 years old patients:", nrow(test_hc_first_visit_[test_hc_first_visit_$age_group == "6 - 12 years old", ]))
+message("13 - 19 years old patients:", nrow(test_hc_first_visit_[test_hc_first_visit_$age_group == "13 - 19 years old", ]))
+message("20 - 25 years old patients:", nrow(test_hc_first_visit_[test_hc_first_visit_$age_group == "20 - 25 years old", ]))
+message("26+ years old patients:", nrow(test_hc_first_visit_[test_hc_first_visit_$age_group == "26+ years old", ]))
+
+# DMD patients first and second is 84
+# Age group in percentage of DMD patients
+# 100 / nrow(dmd) * test_hc_first_visit_[test_hc_first_visit_$age_group == "0 - 5 years old", ]
+# r <- 100 / 84 * test_hc_first_visit_[test_hc_first_visit_$age_group == "6 - 12 years old", ]
+# message("6 - 12 years old patients in percentage:", r, "%")
+
+# patients under 5 years old
+patients_0_5 <- nrow(test_hc_first_visit_[test_hc_first_visit_$age_group == "0 - 5 years old", ])
+percentage_0_5 <- 100 / nrow(dmd) * patients_0_5
+
+patients_6_12 <- nrow(test_hc_first_visit_[test_hc_first_visit_$age_group == "6 - 12 years old", ])
+percentage_6_12 <- 100 / nrow(dmd) * patients_6_12
+
+patients_13_19 <- nrow(test_hc_first_visit_[test_hc_first_visit_$age_group == "13 - 19 years old", ])
+percentage_13_19 <- 100 / nrow(dmd) * patients_13_19
+
+patients_20_25 <- nrow(test_hc_first_visit_[test_hc_first_visit_$age_group == "20 - 25 years old", ])
+percentage_20_25 <- 100 / nrow(dmd) * patients_20_25
+
+patients_26 <- nrow(test_hc_first_visit_[test_hc_first_visit_$age_group == "26+ years old", ])
+percentage_26 <- 100 / nrow(dmd) * patients_26
+
+message("0 - 5 years old patients in percentage:", percentage_0_5, "%")
+message("6 - 12 years old patients in percentage:", percentage_6_12, "%")
+message("13 - 19 years old patients in percentage:", percentage_13_19, "%")
+message("20 - 25 years old patients in percentage:", percentage_20_25, "%")
+message("26+ years old patients in percentage:", percentage_26, "%")
+
+
+
+
+
+
+# # Count all rows of hc dmd with unique ID
+# message("DMD total patients!:", length(unique(dmd$ID)))
+# message("HC total patients!", length(unique(hc$ID)), "\n")
+# message("DMD total patients:", nrow(dmd))
+# message("HC total patients:", nrow(hc), "\n")
+
+
+
+
+all_patients <- rbind(dmd, hc)
+clean_data <- all_patients[is.finite(all_patients$Age) & is.finite(all_patients$TBV), ]
 
 # # Print column names to check if the data is loaded correctly
 # message("Columns in DMD and HC:")
@@ -69,6 +179,9 @@ message("HC amount of NL kids:", nrow(hc_kids_nl))
 message("HC amount of UK kids:", nrow(hc_kids_uk), "\n")
 
 
+
+
+
 # Calculate mean of the age of DMD and HC patients
 mean_dmd_age <- round(mean(dmd$Age, na.rm = TRUE), 1)
 mean_age_hc <- round(mean(hc$Age, na.rm = TRUE), 1)
@@ -87,34 +200,52 @@ dmd_adults <- rbind(dmd_adults_nl, hc_adults_nl)
 hc_adults <- rbind(hc_adults_nl)
 
 
-#################################### Descriptive Statistics   #########################
+# dmd <- unique(dmd$ID)
+# hc <- unique(hc$ID)
 
-all_patients <- rbind(dmd, hc)
-clean_data <- all_patients[is.finite(all_patients$Age) & is.finite(all_patients$TBV), ]
-mo <- lm(TBV ~ Age, data = clean_data)
-plot(all_patients$Age, all_patients$TBV, xlab = "Age", ylab = "TBV cm^3", pch = 20, col = "grey35")
-
-
-# GLM model to predict the brain volume based on the age and group
-# y = B0 + B1 * x1 + B2 * x2 + B3 * x1 * x2
-# y = B0 + B1 * x1 + B2 * x2 + B3 * Bn * Xn + e
-# B1 * x1 is the central determinent of the model
-# B2 * x2 are the covariants of the model
-model <- lm(TBV ~ Age, data = dmd)
-model2 <- lm(TBV ~ Age, data = hc)
-print(summary(model))
-print(summary(model2))
+# message("HC patients first visit:", length(unique(hc_patients_first_visit$ID)))
 
 
 
-plot(clean_data$Age, clean_data$TBV, xlab = "Age", ylab = "TBV cm^3",
-pch = 20, col = "grey35")
-abline(lm(TBV ~ Age, data = clean_data), col = "red")
-lines(lowess(clean_data$Age, clean_data$TBV), col = "blue", lty = "longdash")
+# message("DMD total patients:", nrow(dmd))
+# dmd <- unique(dmd$ID)
+# print(dmd)
+# message("DMD unique patients:", nrow(dmd))
+# hc <- unique(hc$ID)
 
-######################
 
 
+# #################################### Descriptive Statistics   #########################
+
+# # all_patients <- rbind(dmd, hc)
+# # clean_data <- all_patients[is.finite(all_patients$Age) & is.finite(all_patients$TBV), ]
+# # mo <- lm(TBV ~ Age, data = clean_data)
+# # plot(all_patients$Age, all_patients$TBV, xlab = "Age", ylab = "TBV cm^3", pch = 20, col = "grey35")
+
+
+# # GLM model to predict the brain volume based on the age and group
+# # y = B0 + B1 * x1 + B2 * x2 + B3 * x1 * x2
+# # y = B0 + B1 * x1 + B2 * x2 + B3 * Bn * Xn + e
+# # B1 * x1 is the central determinent of the model
+# # B2 * x2 are the covariants of the model
+# model <- lm(TBV ~ Age, data = dmd)
+# model2 <- lm(TBV ~ Age, data = hc)
+# print(summary(model))
+# print(summary(model2))
+
+
+
+# plot(clean_data$Age, clean_data$TBV, xlab = "Age", ylab = "TBV cm^3",
+# pch = 20, col = "grey35")
+# abline(lm(TBV ~ Age, data = clean_data), col = "red")
+# lines(lowess(clean_data$Age, clean_data$TBV), col = "blue", lty = "longdash")
+
+# Calculate the mean of the age of DMD and HC patients which is both first visit and second
+mean_dmd <- round(mean(dmd$Age, na.rm = TRUE), 1)
+mean_hc <- round(mean(hc$Age, na.rm = TRUE), 1)
+
+message("Mean age DMD patients: ", mean_dmd)
+message("Mean age HC patients: ", mean_hc, "\n")
 
 
 # Calculate mean of the age of DMD kids and HC kids in the combined kids dataset
@@ -142,12 +273,7 @@ message("Mean age of HC kids in NL:", mean_hc_kids_nl_age)
 message("Mean age of HC kids in UK:", mean_hc_kids_uk_age, "\n")
 
 
-# calculate the standard deviation of dmd kids and hc kids
-sd_dmd_kids_age <- round(sd(dmd_kids$Age, na.rm = TRUE), 1)
-sd_hc_kids_age <- round(sd(hc_kids$Age, na.rm = TRUE), 1)
 
-message("SD of DMD kids age:", sd_dmd_kids_age)
-message("SD of HC kids age:", sd_hc_kids_age, "\n")
 
 # Calculate the standart deviation of the age of DMD and HC patients
 sd_dmd_age <- round(sd(dmd$Age, na.rm = TRUE), 1)
@@ -155,6 +281,14 @@ sd_hc_age <- round(sd(hc$Age, na.rm = TRUE), 1)
 
 message("SD of DMD age:", sd_dmd_age)
 message("SD of HC age:", sd_hc_age, "\n")
+
+# calculate the standard deviation of dmd kids and hc kids
+sd_dmd_kids_age <- round(sd(dmd_kids$Age, na.rm = TRUE), 1)
+sd_hc_kids_age <- round(sd(hc_kids$Age, na.rm = TRUE), 1)
+
+message("SD of DMD kids age:", sd_dmd_kids_age)
+message("SD of HC kids age:", sd_hc_kids_age, "\n")
+
 
 # Calculate the standart deviation of the age
 # of DMD and HC patients in the Netherlands and UK
