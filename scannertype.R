@@ -2,9 +2,9 @@ library(readxl)
 library(dplyr)
 library(ggplot2)
 
-file_path <- "DATASET_V4_SMO.xlsx"
-if (!file.exists(file_path)) stop("File does not exist")
-dataset <- read_excel(file_path)
+source("read_excel_file.R")
+
+dataset <- read_excel_file()
 
 replace_values_with_na_mutate <- function(df, rules) {
   df %>%
@@ -38,7 +38,8 @@ scanner_groups <- c("DMDBNL", "DMDBUK", "DMDBA")
 
 test_dmd <- data.frame(
   ID = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
-  Scannertype = c(2, 0, 1, 1, 1, 1, 1, 2, 2, 0)
+  Scannertype = c(2, 0, 1, 1, 1, 1, 1, 2, 2, 0),
+  Mutations = c(1, 2, 9999, 1, 1, 2, 2, 0, 0, 1)
 )
 
 test_dmd_scannertype <- test_dmd %>%

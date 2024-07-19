@@ -1,9 +1,12 @@
 library(readxl)
 library(dplyr)
+source("read_excel_file.R")
 
-file_path <- "DATASET_V4_SMO.xlsx"
-if (!file.exists(file_path)) stop("File does not exist")
-dataset <- read_excel(file_path)
+# file_path <- "DATASET_V4_SMO.xlsx"
+# if (!file.exists(file_path)) stop("File does not exist")
+# dataset <- read_excel(file_path)
+
+dataset <- read_excel_file()
 
 replace_values_with_na_mutate <- function(df, rules) {
   df %>%
