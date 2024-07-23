@@ -49,7 +49,8 @@ categorize_mutations <- function(df) {
         Mutation == 0 ~ "Healthy",
         Mutation == 1 ~ "Proximal",
         Mutation == 2 ~ "Distal",
-        Mutation == 3 ~ "Unknown"
+        Mutation == 3 ~ "Unknown",
+	####TRUE ~ "other"
       )
     )
 }
@@ -72,6 +73,8 @@ print_group_percentages <- function(patient_type, df, group_column) {
   print(groups)
 
   total_patients <- nrow(df_filtered)
+  print(total_patients)
+  print(nrow(df))
 
   for (group in groups) {
     if (!is.na(group)) {
@@ -98,3 +101,22 @@ hc <- categorize_mutations(hc)
 
 print_group_percentages("dmd", dmd, "mutation_group")
 print_group_percentages("hc", hc, "mutation_group")
+
+
+# dmd_mutation <- dmd %>%
+#   mutate(
+#     mutation_group = case_when(
+#       Mutation == 0 ~ "Healthy",
+#       Mutation == 1 ~ "Proximal",
+#       Mutation == 2 ~ "Distal",
+#       Mutation == 3 ~ "Unknown"
+#     )
+#   )
+
+# mutation_groups <- unique(dmd_mutation$mutation_group)
+
+# for (group in mutation_groups) {
+#   patients_count <- nrow(dmd_mutation[dmd_mutation$mutation_group == group, ])
+#   percentage <- round(100 / nrow(dmd) * patients_count, 1)
+#   message("Percentage of dmd patients with mutation group ", group, " is: ", percentage, "%")
+# }
