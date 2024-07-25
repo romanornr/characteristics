@@ -66,10 +66,6 @@ all_patients <- all_patients %>%
   mutate(group = ifelse(Disease == 1, "DMD", "HC"))
 
 
-model <- lm(TBV_Ratio ~ Age, data = all_patients)
-summary(model)
-coef(model)
-
 # Plot
 f <- ggplot(all_patients, aes(x = Age, y = TBV, color = group)) +
   geom_point(na.rm = TRUE) +
@@ -81,6 +77,12 @@ f <- ggplot(all_patients, aes(x = Age, y = TBV, color = group)) +
   theme_classic()
 
   ggsave("plots/tbv_ratio_age.png", plot = f)
+
+model <- lm(TBV_Ratio ~ Age, data = all_patients)
+summary(model)
+coef(model)
+
+plot(model, c(1, 2))
 
 
 
