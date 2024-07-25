@@ -66,21 +66,9 @@ all_patients <- all_patients %>%
   mutate(group = ifelse(Disease == 1, "DMD", "HC"))
 
 
-# model <- lm(TBV_Ratio ~ Age, data = dmd)
-
-
-# # Plot 
-# # dmd patients in red and hc patients in green
-# f <- ggplot(all_patients, aes(x = Age, y = TBV, color = group)) +
-#   geom_point(
-#     na.rm = TRUE,
-#   )
-#   labs(title = "Scatterplot of brain volume", x = "Age", y = "TBV", color = "Group") +
-#     theme(plot.title = element_text(hjust = 0.5)) +
-#     ##scale_color_manual(values = c("green", "red")) +
-#     geom_smooth(method = "lm", se = FALSE, color = "black") +
-#     theme_minimal()
-
+model <- lm(TBV_Ratio ~ Age, data = all_patients)
+summary(model)
+coef(model)
 
 # Plot
 f <- ggplot(all_patients, aes(x = Age, y = TBV, color = group)) +
