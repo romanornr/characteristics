@@ -56,17 +56,20 @@ hc <- replace_values_with_na_mutate(hc, rules)
 #   Disease = c(1, 1, 1, 1, 1, 1)
 # )
 
+
+# Combine the two datasets (dmd and hc) into one data frame named all_patients
 all_patients <- rbind(dmd, hc)
 
 #all_patients <- rbind(dmd_patients_first_visit, hc_patients_first_visit)
 
-### mutate all_patients to add another column with group
+# mutate all_patients to add another column with group
+# Assuming 'Disease' column where 1 indicates DMD and other values indicate HC
 # Give dmd the group color red and hc the group color green
 all_patients <- all_patients %>%
   mutate(group = ifelse(Disease == 1, "DMD", "HC"))
 
 
-# Plot
+# Scatterplot of TBV ratio vs Age 
 f <- ggplot(all_patients, aes(x = Age, y = TBV, color = group)) +
   geom_point(na.rm = TRUE) +
   labs(title = "Scatterplot of Brain Volume", x = "Age", y = "TBV", color = "Group") +
@@ -78,10 +81,17 @@ f <- ggplot(all_patients, aes(x = Age, y = TBV, color = group)) +
 
   ggsave("plots/tbv_ratio_age.png", plot = f)
 
+# Fit a linear model to predict TBV_Ratio based on Age
 model <- lm(TBV_Ratio ~ Age, data = all_patients)
+
+# Print the model summary and coefficients
 summary(model)
+# Print the coefficients of the model
 coef(model)
 
+# Plot the diagnostic plots for the linear model
+# 1: Residuals vs Fitted
+# 2: Normal Q-Q
 plot(model, c(1, 2))
 
 
