@@ -263,39 +263,110 @@ if (any(is.na(all_patients$Age)) || any(!is.finite(all_patients$Age))) {
 
 fit <- gam(TBV_Ratio ~ s(Age, k = 4), data = all_patients)
 
+# fit_dmd <- gam(TBV ~ s(Age, k = 4), data = subset(all_patients, group == "DMD"))
+# fit_hc <- gam(TBV ~ s(Age, k = 4), data = subset(all_patients, group == "HC"))
+
+fit_dmd <- gam(TBV_Ratio ~ s(Age, k = 4), data = subset(all_patients, group == "DMD"))
+fit_hc <- gam(TBV_Ratio ~ s(Age, k = 4), data = subset(all_patients, group == "HC"))
+
 # Ensure the Age column is numeric
 all_patients$Age <- as.numeric(all_patients$Age)
-
 #age_range <- seq(min(all_patients$Age, na.rm = TRUE), max(all_patients$Age, na.rm = TRUE), length.out = 100)
 age_range <- seq(min(all_patients$Age), max(all_patients$Age), length.out = 100)
 
-# Create a new data frame for prediction
-new_data <- data.frame(
+# # Create a new data frame for prediction
+# new_data <- data.frame(
+#   Age = age_range,
+#   Group = rep("HC", length(age_range)) # Predicting for DMD group, repeat for HC if needed
+# )
+
+pred_dmd <- predict(fit_dmd, newdata = data.frame(Age = age_range), se.fit = TRUE)
+dmd_data <- data.frame(
   Age = age_range,
-  Group = rep("DMD", length(age_range)) # Predicting for DMD group, repeat for HC if needed
+  TBV = pred_dmd$fit,
+  se = pred_dmd$se.fit,
+  upper = pred_dmd$fit + 1.96 * pred_dmd$se.fit,
+  lower = pred_dmd$fit - 1.96 * pred_dmd$se.fit,
+  group = "DMD"
 )
 
-#new_data$TBV <- predict(fit, newdata = new_data, re.form = NA)
 
-predictions <- predict(fit, newdata = new_data, se.fit = TRUE)
-# Add predictions and confidence intervals to the new data frame
-new_data$TBV <- predictions$fit
-new_data$se <- predictions$se.fit
-new_data$upper <- new_data$TBV + 1.96 * new_data$se
-new_data$lower <- new_data$TBV - 1.96 * new_data$se
+pred_hc <- predict(fit_hc, newdata = data.frame(Age = age_range), se.fit = TRUE)
+hc_data <- data.frame(
+  Age = age_range,
+  TBV = pred_hc$fit,
+  se = pred_hc$se.fit,
+  upper = pred_hc$fit + 1.96 * pred_hc$se.fit,
+  lower = pred_hc$fit - 1.96 * pred_hc$se.fit,
+  group = "HC"
+)
 
+pred_data <- rbind(dmd_data, hc_data)
 
-# Print the first few rows of new_data to check its contents
-print(head(new_data))
-
+# Now create the plot
 p <- ggplot() +
   geom_point(data = all_patients, aes(x = Age, y = TBV_Ratio, color = group), na.rm = TRUE) +
-  geom_line(data = new_data, aes(x = Age, y = TBV), color = "blue") +
-  geom_ribbon(data = new_data, aes(x = Age, ymin = lower, ymax = upper), fill = "gray", alpha = 0.2) +
-  labs(title = "Spline plot TBV Ratio vs Age", x = "Age", y = "TBV Ratio", color = "Group") +
+  geom_line(data = pred_data, aes(x = Age, y = TBV, color = group)) +
+  geom_ribbon(data = pred_data, aes(x = Age, ymin = lower, ymax = upper, fill = group), alpha = 0.2) +
+  labs(title = "Spline plot TBV Ratio vs Age", x = "Age", y = "TBV Ratio", color = "Group", fill = "Group") +
   theme(plot.title = element_text(hjust = 0.5)) +
   scale_color_manual(values = c("DMD" = "red", "HC" = "green")) +
+  scale_fill_manual(values = c("DMD" = "red", "HC" = "green")) +
+  theme_classic()
+
+# Now create the plot
+p <- ggplot() +
+  geom_point(data = all_patients, aes(x = Age, y = TBV_Ratio, color = group), na.rm = TRUE) +
+  geom_line(data = pred_data, aes(x = Age, y = TBV, color = group)) +
+  geom_ribbon(data = pred_data, aes(x = Age, ymin = lower, ymax = upper, fill = group), alpha = 0.2) +
+  labs(title = "Spline plot TBV Ratio vs Age", x = "Age", y = "TBV Ratio", color = "Group", fill = "Group") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_color_manual(values = c("DMD" = "red", "HC" = "green")) +
+  scale_fill_manual(values = c("DMD" = "red", "HC" = "green")) +
   theme_classic()
 
 
-ggsave("plots/spline_plot_tbv_ratio_age.png", plot = p)
+# predictions <- predict(fit, newdata = new_data, se.fit = TRUE)
+# # Add predictions and confidence intervals to the new data frame
+# new_data$TBV <- predictions$fit
+# new_data$se <- predictions$se.fit
+# new_data$upper <- new_data$TBV + 1.96 * new_data$se
+# new_data$lower <- new_data$TBV - 1.96 * new_data$se
+
+
+# new_data_dmd <- data.frame(
+#   Age = age_range,
+#   Group = rep("DMD", length(age_range)) # Predicting for DMD group, repeat for HC if needed
+# )
+
+# new_data_hc <- data.frame(
+#   Age = age_range,
+#   Group = rep("HC", length(age_range)) # Predicting for DMD group, repeat for HC if needed
+# )
+
+# # Plot the spline fit with confidence intervals
+# p <- ggplot() +
+#   geom_point(data = all_patients, aes(x = Age, y = TBV_Ratio, color = group), na.rm = TRUE) +
+#   geom_line(data = new_data, aes(x = Age, y = TBV, color = Group)) +
+#   geom_ribbon(data = new_data, aes(x = Age, ymin = lower, ymax = upper, fill = Group), alpha = 0.2) +
+#   labs(title = "Spline plot TBV Ratio vs Age", x = "Age", y = "TBV Ratio", color = "Group", fill = "Group") +
+#   theme(plot.title = element_text(hjust = 0.5)) +
+#   scale_color_manual(values = c("DMD" = "red", "HC" = "green")) +
+#   scale_fill_manual(values = c("DMD" = "red", "HC" = "green")) +
+#   theme_classic()
+
+# # # Print the first few rows of new_data to check its contents
+# # print(head(new_data))
+
+# # p <- ggplot() +
+# #   geom_point(data = all_patients, aes(x = Age, y = TBV_Ratio, color = group), na.rm = TRUE) +
+# #   geom_line(data = new_data, aes(x = Age, y = TBV), color = "blue") +
+# #   geom_ribbon(data = new_data, aes(x = Age, ymin = lower, ymax = upper), fill = "gray", alpha = 0.2) +
+# #   labs(title = "Spline plot TBV Ratio vs Age", x = "Age", y = "TBV Ratio", color = "Group") +
+# #   theme(plot.title = element_text(hjust = 0.5)) +
+# #   scale_color_manual(values = c("DMD" = "red", "HC" = "green")) +
+# #   theme_classic()
+
+
+
+ ggsave("plots/spline_plot_tbv_ratio_age.png", plot = p)
