@@ -4,6 +4,10 @@ library(ggplot2)
 library(hrbrthemes)
 library(lme4)
 library(lmerTest)
+library(splines)
+library(rms)
+library(mgcv)
+
 
 source("read_excel_file.R")
 
@@ -141,19 +145,157 @@ patient_with_group <- all_patients %>%
 model_tbv_ratio <- lmer(TBV_Ratio ~ Age + Age2 + group + Scannertype + Headcoil + Mutation + Corticosteroid + (1 | ID), data = all_patients)
 # Print the summary, which now includes p-values
 print(summary(model_tbv_ratio))
+message("\n")
 
-# # print patient with group table, disease table and id column 
-# patient_with_group <- all_patients %>%
-#   select(ID, Disease, group) %>%
-#   arrange(Disease)
+message("Model with interaction effect")
 
-# disease_table <- all_patients %>%
-#   select(Disease, ID) %>%
-#   distinct() %>%
-#   arrange(Disease)
+model_tbv_ratio_ie <- lmer(TBV_Ratio ~ group * Age + I(Age^2) + Scannertype + Headcoil + Mutation + Corticosteroid + (1 | ID), data = all_patients)
+print(summary(model_tbv_ratio_ie))
 
 
-# print(patient_with_group)
-# print(disease_table)
+
+message("\n")
+message("Model with random intercept and slope")
+model2 <- lm(TBV_Ratio ~ group * Age + (Age^2), data = all_patients)
+summary(model2)
+
+message("\n")
+message("Model with random intercept for ID")
+# Fit a linear mixed-effects model with random intercept for ID
+model3 <- lmer(TBV_Ratio ~ group + Age + (Age^2) + Scannertype + (1 | ID), data = all_patients)
+print(summary(model3))
+
+message("\n")
+message("Model 4")
+model4 <- lmer(TBV_Ratio ~ group + Age + (Age^2) + Headcoil + (1 | ID), data = all_patients)
+print(summary(model4))
+
+message("\n")
+message("Model 5")
+model5 <- lmer(TBV_Ratio ~ group + Age + (Age^2) + Mutation + (1 | ID), data = all_patients)
+print(summary(model5))
+
+message("\n")
+message("Model 6")
+model6 <- lmer(TBV_Ratio ~ group + Age + (Age^2) + Corticosteroid + (1 | ID), data = all_patients)
+print(summary(model6))
+
+message("\n")
+message("Model 7")
+model7 <- lmer(TBV_Ratio ~ group + Age + I(Age^2) + group:Age + Scannertype + Headcoil + Mutation + Corticosteroid + (1 | ID), data = all_patients)
+print(summary(model7))
+
+message("\n")
+message("Model 8")
+model8 <- lmer(TBV_Ratio ~ group + Age + I(Age^2) + group:(Age^2) + Scannertype + Headcoil + Mutation + Corticosteroid + (1 | ID), data = all_patients)
+print(summary(model8))
+
+message("\n")
+message("Model 9")
+model9 <- lmer(TBV_Ratio ~ group * ns(Age, df = 4) + I(Age^2) + Scannertype + (1 | ID), data = all_patients)
+print(summary(model9))
+
+message("\n")
+
+# use rms package 
+model_tbv_ratio_splines <- lmer(TBV_Ratio ~ group + rcs(Age, 4) + I(Age^2) + Scannertype + Headcoil + Mutation + Corticosteroid + (1 | ID), data = all_patients)
+print(summary(model_tbv_ratio_splines))
+
+message("\n")
+model_tbv_ratio_splines_2 <- lmer(TBV_Ratio ~ group + rcs(Age, 4) + I(Age^2) + Scannertype + (1 | ID), data = all_patients)
+print(summary(model_tbv_ratio_splines_2))
 
 
+
+model_tbv_ratio_splines_3 <- lmer(TBV_Ratio ~ group + rcs(Age, 4) + I(Age^2) + (1 | ID), data = all_patients)
+print(summary(model_tbv_ratio_splines_3))
+
+
+message("\n")
+message("-----------------------------------------------------------")
+
+model9_AIC_value <- AIC(model9)
+model9_BIC_value <- BIC(model9)
+model9_logLik_value <- logLik(model9)
+
+message("Model 9 AIC value: ", model9_AIC_value)
+message("Model 9 BIC value: ", model9_BIC_value)
+message("Model 9 logLik value: ", model9_logLik_value)
+
+message("\n")
+
+model_tbv_ratio_splines_AIC_value <- AIC(model_tbv_ratio_splines)
+model_tbv_ratio_splines_BIC_value <- BIC(model_tbv_ratio_splines)
+model_tbv_ratio_splines_logLik_value <- logLik(model_tbv_ratio_splines)
+
+message("Model TBV Ratio Splines AIC value: ", model_tbv_ratio_splines_AIC_value)
+message("Model TBV Ratio Splines BIC value: ", model_tbv_ratio_splines_BIC_value)
+message("Model TBV Ratio Splines logLik value: ", model_tbv_ratio_splines_logLik_value)
+
+message("\n")
+
+model_tbv_ratio_splines_2_AIC_value <- AIC(model_tbv_ratio_splines_2)
+model_tbv_ratio_splines_2_BIC_value <- BIC(model_tbv_ratio_splines_2)
+model_tbv_ratio_splines_2_logLik_value <- logLik(model_tbv_ratio_splines_2)
+
+message("Model TBV Ratio Splines 2 AIC value: ", model_tbv_ratio_splines_2_AIC_value)
+message("Model TBV Ratio Splines 2 BIC value: ", model_tbv_ratio_splines_2_BIC_value)
+message("Model TBV Ratio Splines 2 logLik value: ", model_tbv_ratio_splines_2_logLik_value)
+
+message("\n")
+
+model_tbv_ratio_splines_3_AIC_value <- AIC(model_tbv_ratio_splines_3)
+model_tbv_ratio_splines_3_BIC_value <- BIC(model_tbv_ratio_splines_3)
+model_tbv_ratio_splines_3_logLik_value <- logLik(model_tbv_ratio_splines_3)
+
+message("Model TBV Ratio Splines 3 AIC value: ", model_tbv_ratio_splines_3_AIC_value)
+message("Model TBV Ratio Splines 3 BIC value: ", model_tbv_ratio_splines_3_BIC_value)
+message("Model TBV Ratio Splines 3 logLik value: ", model_tbv_ratio_splines_3_logLik_value)
+
+
+# Check for non-numeric or missing values in the Age column
+if (any(is.na(all_patients$Age)) || any(!is.finite(all_patients$Age))) {
+  # Handle missing or non-numeric values in Age
+  all_patients <- all_patients %>%
+    filter(!is.na(Age) & is.finite(Age))
+}
+
+
+fit <- gam(TBV_Ratio ~ s(Age, k = 4), data = all_patients)
+
+# Ensure the Age column is numeric
+all_patients$Age <- as.numeric(all_patients$Age)
+
+#age_range <- seq(min(all_patients$Age, na.rm = TRUE), max(all_patients$Age, na.rm = TRUE), length.out = 100)
+age_range <- seq(min(all_patients$Age), max(all_patients$Age), length.out = 100)
+
+# Create a new data frame for prediction
+new_data <- data.frame(
+  Age = age_range,
+  Group = rep("DMD", length(age_range)) # Predicting for DMD group, repeat for HC if needed
+)
+
+#new_data$TBV <- predict(fit, newdata = new_data, re.form = NA)
+
+predictions <- predict(fit, newdata = new_data, se.fit = TRUE)
+# Add predictions and confidence intervals to the new data frame
+new_data$TBV <- predictions$fit
+new_data$se <- predictions$se.fit
+new_data$upper <- new_data$TBV + 1.96 * new_data$se
+new_data$lower <- new_data$TBV - 1.96 * new_data$se
+
+
+# Print the first few rows of new_data to check its contents
+print(head(new_data))
+
+p <- ggplot() +
+  geom_point(data = all_patients, aes(x = Age, y = TBV_Ratio, color = group), na.rm = TRUE) +
+  geom_line(data = new_data, aes(x = Age, y = TBV), color = "blue") +
+  geom_ribbon(data = new_data, aes(x = Age, ymin = lower, ymax = upper), fill = "gray", alpha = 0.2) +
+  labs(title = "Spline plot TBV Ratio vs Age", x = "Age", y = "TBV Ratio", color = "Group") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_color_manual(values = c("DMD" = "red", "HC" = "green")) +
+  theme_classic()
+
+
+ggsave("plots/spline_plot_tbv_ratio_age.png", plot = p)
