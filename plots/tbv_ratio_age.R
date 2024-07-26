@@ -2,6 +2,7 @@ library(readxl)
 library(dplyr)
 library(ggplot2)
 library(hrbrthemes)
+library(lme4)
 
 source("read_excel_file.R")
 
@@ -94,10 +95,41 @@ coef(model)
 # 2: Normal Q-Q
 plot(model, c(1, 2))
 
+# For the quadratic model, we can add a new column Age^2 to the data frame
+all_patients <- all_patients %>%
+  mutate(Age2 = Age^2)
+  
+all_patients %>%
+  select(ID, Age, Age2) %>%
+  mutate(Age2_formatted = sprintf("%.2f", Age2)) %>%
+  print(n = Inf)
 
 
 
+model.Age2 <- lm(TBV_Ratio ~ Age + Age2, data = all_patients)
+summary(model.Age2)
 
+# Check if all necessary columns exist in the dataset
+required_columns <- c("ID", "Disease", "Age", "Age2", "Scannertype", "Headcoil", "Mutation", "Corticosteroid")
+missing_columns <- setdiff(required_columns, colnames(all_patients))
+
+if (length(missing_columns) > 0) {
+  stop(paste("The following required columns are missing in the dataset:", paste(missing_columns, collapse = ", ")))
+}
+
+## print patient ID and group column
+patient_with_group <- all_patients %>%
+  select(ID, group) %>%
+  arrange(ID)
+
+print(patient_with_group)
+
+
+model_tbv_ratio <- lmer(TBV_Ratio ~ Age + Age2 + group + Scannertype + Headcoil + Mutation + Corticosteroid + (1 | ID), data = all_patients)
+
+#model_tbv_ratio <- lmer(TBV_Ratio ~ Age + Age2 + group + Scannertype + Headcoil + Mutation + Corticosteroid, data = all_patients)
+
+print(summary(model_tbv_ratio))
 
 # # print patient with group table, disease table and id column 
 # patient_with_group <- all_patients %>%
