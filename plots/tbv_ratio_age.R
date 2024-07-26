@@ -3,6 +3,7 @@ library(dplyr)
 library(ggplot2)
 library(hrbrthemes)
 library(lme4)
+library(lmerTest)
 
 source("read_excel_file.R")
 
@@ -122,13 +123,23 @@ patient_with_group <- all_patients %>%
   select(ID, group) %>%
   arrange(ID)
 
-print(patient_with_group)
+# print(patient_with_group)
 
 
+# model_tbv_ratio <- lmer(TBV_Ratio ~ Age + Age2 + group + Scannertype + Headcoil + Mutation + Corticosteroid + (1 | ID), data = all_patients)
+# #model_tbv_ratio <- lmer(TBV_Ratio ~ Age + Age2 + group + Scannertype + Headcoil + Mutation + Corticosteroid, data = all_patients)
+# print(summary(model_tbv_ratio))
+
+
+# Notes
+# In R, when you use the lmer function from the lme4 package to fit a linear mixed-effects model
+# the summary output does not include p-values for the fixed effects by default
+# This is because calculating p-values for mixed models is complex and can be controversial
+# However, we can obtain p-values for the fixed effects using the lmerTest package, which extends lme4 to provide p-values based on Satterthwaite's degrees of freedom method
+# To use lmerTest, you need to install and load the package, and then fit the model using lmerTest::lmer instead of lmer
+# Fit the model using lmerTest::lmer
 model_tbv_ratio <- lmer(TBV_Ratio ~ Age + Age2 + group + Scannertype + Headcoil + Mutation + Corticosteroid + (1 | ID), data = all_patients)
-
-#model_tbv_ratio <- lmer(TBV_Ratio ~ Age + Age2 + group + Scannertype + Headcoil + Mutation + Corticosteroid, data = all_patients)
-
+# Print the summary, which now includes p-values
 print(summary(model_tbv_ratio))
 
 # # print patient with group table, disease table and id column 
