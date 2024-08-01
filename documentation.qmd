@@ -2,6 +2,7 @@
 title: "documentation"
 format: html
 editor: visual
+toc: true
 ---
 
 ## Introduction
@@ -19,11 +20,22 @@ library(readxl)
 library(dplyr)
 library(ggplot2)
 library(DT)
+library(plotly)
 
-file_path <- "DATASET_V2_SMO.xlsx"
-if (!file.exists(file_path)) stop("File does not exist")
-dataset <- read_excel(file_path)
+library(readxl)
+
+read_excel_file <- function() {
+  file_path <- "DATASET_V5_SMO.xlsx"
+  if (!file.exists(file_path)) stop("File does not exist")
+  dataset <- read_excel(file_path)
+  return (dataset)
+}
+
+
+dataset <- read_excel_file()
 ```
+
+------------------------------------------------------------------------
 
 ### Showing interactive table with DT package
 
@@ -33,6 +45,8 @@ We also install the DT package to create interactive tables by opening R and run
 datatable(dataset, 
           options = list(pageLength = 5, scrollX = TRUE))
 ```
+
+------------------------------------------------------------------------
 
 ### Handling missing values
 
@@ -49,9 +63,13 @@ replace_values_with_na_mutate <- function(df, rules) {
 
 rules <- list(
   Age = c(9999),
-  TBV = c(9999)
+  TBV = c(9999),
+  TBV_Ratio = c(9999),
+  Mutation = c(9999)
 )
 ```
+
+------------------------------------------------------------------------
 
 ### Subset data
 
@@ -67,86 +85,506 @@ hc <- replace_values_with_na_mutate(hc, rules)
 ```
 
 ::: {.panel-tabset .nav-pills}
-### DMD
 
+### DMD
 ```{r}
+# Output the number of patients in the DMD group
 message("DMD group amount of patients: ", nrow(dmd), "\n")
+
 ```
 
 ### HC
-
 ```{r}
+# Output the number of patients in the HC group
 message("HC group amount of patients: ", nrow(hc), "\n")
+
 ```
+
+------------------------------------------------------------------------
+
 :::
 
-### Patients Demographics
+## Patients Demographics
+To get a better understanding of patients demographics, we will categorize patients based on their age group. We will create a new column called `age_group` and categorize patients based on their age.
 
-To further analyse the data and get a better understanding of the patients demographics, we create a subset of the DMD and HC groups to futher categorize patients based on their country and if they're adults or children.
+We also create the subset of the DMD and HC groups based on patient ID to distinguish adults, kids and the country they're from. Which in this case can be either the Netherlands or UK. We can count the amount of patients in each group with the nrow() function.
 
-So we will further subset the DMD and HC groups based on patiend ID to distinguish adults, kids and the country they're from. Which in this case can be either the Netherlands or UK. We can count the amount of patients in each group with the nrow() function.
 
+::: {.panel-tabset .nav-pills}
+### DMD
 ```{r}
-# Subset kids patients
-dmd_adults_nl <- dmd[grepl("^DMDBA", dmd$ID), ]
-dmd_kids_nl <- dmd[grepl("^DMDBNL", dmd$ID), ]
-dmd_kids_uk <- dmd[grepl("^DMDBUK", dmd$ID), ]
-
-# Subset HC patients
-hc_adults_nl <- hc[grepl("^DMDBA", hc$ID), ]
-hc_kids_nl <- hc[grepl("^DMDBNL", hc$ID), ]
-hc_kids_uk <- hc[grepl("^DMDBUK", hc$ID), ]
+# Subset DMD patients by country and age group
+dmd_adults_nl <- dmd[grepl("^DMDBA", dmd$ID), ]   # NL adults
+dmd_kids_nl <- dmd[grepl("^DMDBNL", dmd$ID), ]    # NL kids
+dmd_kids_uk <- dmd[grepl("^DMDBUK", dmd$ID), ]    # UK kids
 
 ```
 
+### HC
+```{r}
+# Subset HC patients by country and age group
+hc_adults_nl <- hc[grepl("^DMDBA", hc$ID), ]      # NL adults
+hc_kids_nl <- hc[grepl("^DMDBNL", hc$ID), ]       # NL kids
+hc_kids_uk <- hc[grepl("^DMDBUK", hc$ID), ]       # UK kids
+
+```
+:::
+------------------------------------------------------------------------
+
+### Categorize patients into different (age) groups
 ::: {.panel-tabset .nav-pills}
 ### DMD
 
 ```{r}
+# Output the number of patients in each DMD subgroup
 message("DMD amount of NL adults:", nrow(dmd_adults_nl))
 message("DMD amount of NL kids:", nrow(dmd_kids_nl))
 message("DMD amount of UK kids:", nrow(dmd_kids_uk), "\n")
 ```
 
 ### HC
-
 ```{r}
+# Output the number of patients in each HC subgroup
 message("HC amount of NL adults:", nrow(hc_adults_nl))
 message("HC amount of NL kids:", nrow(hc_kids_nl))
 message("HC amount of UK kids:", nrow(hc_kids_uk), "\n")
 ```
 
-### kids
 
+### kids
 ```{r}
+# Output the number of kids in the DMD and HC groups
 message("DMD amount of NL kids:", nrow(dmd_kids_nl))
 message("DMD amount of UK kids:", nrow(dmd_kids_uk), "\n")
-
 ```
 
 ### Adults
-
 ```{r}
+# Output the number of adults in the HC group
 message("HC amount of NL adults:", nrow(hc_adults_nl))
 message("HC amount of NL kids:", nrow(hc_kids_nl))
 message("HC amount of UK kids:", nrow(hc_kids_uk), "\n")
 ```
 
 ### Netherlands
-
 ```{r}
+# Output the number of DMD and HC patients from the Netherlands
 message("DMD amount of NL adults:", nrow(dmd_adults_nl))
 message("DMD amount of NL kids:", nrow(dmd_kids_nl))
 message("HC amount of NL adults:", nrow(hc_adults_nl))
 message("HC amount of NL kids:", nrow(hc_kids_nl))
-
 ```
 
 ### UK
-
 ```{r}
+# Output the number of DMD and HC patients from the UK
 message("DMD amount of UK kids:", nrow(dmd_kids_uk))
 message("HC amount of UK kids:", nrow(hc_kids_uk))
+```
+
+:::
+
+
+```{r}
+# Load the required package
+library(maps)
+
+# No margin
+par(mar=c(0,0,0,0))
+
+# World map focused on Western Europe and the UK
+map('world',
+    col="#d9d9d9", fill=TRUE, bg="white", lwd=0.5,
+    mar=rep(0,4), border="#999999", ylim=c(45, 60), xlim=c(-10, 10)
+)
+
+# Cities coordinates
+London <- c(-0.1276, 51.5074)  # Longitude and latitude for London
+Amsterdam <- c(4.9041, 52.3676)  # Longitude and latitude for Amsterdam
+
+# Data frame
+data <- rbind(London, Amsterdam) %>% 
+  as.data.frame()
+colnames(data) <- c("long", "lat")
+
+# Show the cities on the map
+points(x=data$long, y=data$lat, col="darkred", cex=2.5, pch=19)
+```
+
+------------------------------------------------------------------------
+
+## Visit Analysis
+
+### Filter data by the visit column
+
+First we filter the data by the visit column to get the unique values in the column.
+```{r}
+# Filter data based on visit numbers
+dmd_first_visit <- dmd %>% filter(Visit == 1)
+dmd_second_visit <- dmd %>% filter(Visit == 2)
+hc_first_visit <- hc %>% filter(Visit == 1)
+hc_second_visit <- hc %>% filter(Visit == 2)
+```
+
+### Count the number of patients in each group
+Next we output the number of patients in each group for the first and second visit.
+
+::: {.panel-tabset .nav-pills}
+### DMD
+```{r}
+message("DMD second and first visit: ", nrow(dmd))
+message("DMD first visit:", nrow(dmd_first_visit))
+message("DMD second visit:", nrow(dmd_second_visit), "\n")
+
+```
+
+### HC
+```{r}
+message("HC second and first visit: ", nrow(hc))
+message("HC first visit:", nrow(hc_first_visit))
+message("HC second visit:", nrow(hc_second_visit), "\n")
 
 ```
 :::
+
+------------------------------------------------------------------------
+
+#### Categorize patients into different age groups based on the visit number using the `mutate` and `case_when` functions to get the age distrubution of the patients.
+
+::: {.panel-tabset .nav-pills}
+### DMD
+```{r}
+# Categorize DMD patients based on age groups for the first visit
+dmd_first_visit_ages <- dmd_first_visit %>%
+  mutate(
+    age_group = case_when(
+      Age <= 5 ~ "0 - 5 years old",
+      Age <= 12 ~ "6 - 12 years old",
+      Age <= 19 ~ "13 - 19 years old",
+      Age <= 25 ~ "20 - 25 years old",
+      TRUE ~ "26+ years old"
+    )
+  )
+
+```
+
+### HC
+```{r}
+
+hc_first_visit_ages <- hc_first_visit %>%
+  mutate(
+    age_group = case_when(
+      Age <= 5 ~ "0 - 5 years old",
+      Age <= 12 ~ "6 - 12 years old",
+      Age <= 19 ~ "13 - 19 years old",
+      Age <= 25 ~ "20 - 25 years old",
+      TRUE ~ "26+ years old"
+    )
+  )
+```
+:::
+
+
+:::{.callout-note}
+
+Age Groups: Defined as "0 - 5 years old," "6 - 12 years old," "13 - 19 years old," "20 - 25 years old," and "26+ years old."
+
+:::
+
+
+### Count the number of patients in each age group for the first visit
+```{r}
+# Define age groups
+age_groups <- c("0 - 5 years old", "6 - 12 years old", "13 - 19 years old", "20 - 25 years old", "26+ years old")
+```
+
+
+::: {.panel-tabset .nav-pills}
+### DMD
+```{r}
+# DMD Age Group Analysis
+message("DMD first visit ages:")
+for (age_group in age_groups) {
+  message(age_group, " dmd patients:", nrow(dmd_first_visit_ages[dmd_first_visit_ages$age_group == age_group, ]))
+}
+```
+
+### HC
+```{r}
+message("HC first visit ages:")
+for (age_group in age_groups) {
+	message(age_group, " hc patients:", nrow(hc_first_visit_ages[hc_first_visit_ages$age_group == age_group, ]))
+}
+```
+:::
+
+
+### Calculate the percentage of patients in each age group
+
+
+::: {.panel-tabset .nav-pills}
+### DMD
+```{r}
+# DMD Age Group Percentage Analysis
+message("DMD Patients first visit in percentages")
+for (age_group in age_groups) {
+  patients_count <- nrow(dmd_first_visit_ages[dmd_first_visit_ages$age_group == age_group, ])
+  percentage <- round((100 / nrow(dmd) * patients_count), 1)
+  message(age_group, " patients in percentage:", percentage, "%")
+}
+```
+
+### HC
+
+```{r}
+# HC Age Group Percentage Analysis
+for (age_group in age_groups) {
+	patients_count <- nrow(hc_first_visit_ages[hc_first_visit_ages$age_group == age_group, ])
+	percentage <- round((100 / nrow(hc) * patients_count), 1)
+	message(age_group, " patients in percentage:", percentage, "%")
+}
+```
+
+:::
+
+* Percentage calculation: `(100 / total number of patients) * number of patients in each age group`
+
+* HC Age Group Displays the count of HC patients in each age group for the first visit
+
+------------------------------------------------------------------------
+
+## Scanner Groups Analysis
+Here we analyze scanner groups for both DMD and HC patients to determine the number of patients in each group.
+
+### Filter data by the scanner group column
+We define the scanner groups for DMD and HC patients and filter the data based on the scanner group.
+
+```{r}
+# Define scanner groups
+scanner_groups <- c("DMDBNL", "DMDBUK", "DMDBA")
+```
+
+### Assign patients to scanner groups based on the Scannertype column
+
+::: {.panel-tabset .nav-pills}
+### DMD
+```{r}
+# Assign scanner groups to DMD dataset
+dmd_scannertype <- dmd %>%
+  mutate(
+    scanner_group = case_when(
+      Scannertype == 0 ~ "DMDBNL",
+      Scannertype == 1 ~ "DMDBUK",
+      Scannertype == 2 ~ "DMDBA"
+    )
+  )
+
+```
+
+
+### HC
+```{r}
+# Assign scanner groups to HC dataset
+hc_scannertype <- hc %>%
+  mutate(
+    scanner_group = case_when(
+      Scannertype == 0 ~ "DMDBNL",
+      Scannertype == 1 ~ "DMDBUK",
+      Scannertype == 2 ~ "DMDBA"
+    )
+  )
+```
+:::
+
+:::{.callout-note}
+* Scanner Groups: Defined as "DMDBNL," "DMDBUK," and "DMDBA."
+
+:::
+
+### Calculate the percentage of patients in each scanner group
+
+
+::: {.panel-tabset .nav-pills}
+
+### DMD
+```{r}
+# Output the number of patients in each scanner group
+scanner_group <- unique(dmd_scannertype$scanner_group)
+
+# DMD Scanner Group Analysis
+for (scanner_group in scanner_groups) {
+  patients_count <- nrow(dmd_scannertype[dmd_scannertype$scanner_group == scanner_group, ])
+  percentage <- round(100 / nrow(dmd) * patients_count, 1)
+  message("Percentage of DMD patients with scanner group ", scanner_group, " is: ", percentage, "%")
+}
+```
+
+### HC
+```{r}
+scanner_groups <- unique(hc_scannertype$scanner_group)
+
+# Calculate percentage of patients in each scanner group for HC dataset
+for (scanner_group in scanner_groups) {
+  patients_count <- nrow(hc_scannertype[hc_scannertype$scanner_group == scanner_group, ])
+  percentage <- round(100 / nrow(hc) * patients_count, 1)
+  message("Percentage of HC patients with scanner group ", scanner_group, " is: ", percentage, "%")
+}
+
+```
+:::
+
+
+
+
+## TBV Ratio Analysis
+We will conduct a thorough analysis of the TBV ratio for both DMD and HC patients. This will involve calculating the mean and standard deviation, creating histograms, QQ plots, and boxplots to visualize data distributions, as well as assasing correlations and performing linear regression anal
+
+
+### Calculate Mean and Standard Deviation of TBV Ratio
+We first calculate the mean and standard deviation of the TBV ratio for both DMD and HC groups.
+
+::: {.panel-tabset .nav-pills}
+### Mean TBV Ratio
+
+```{r}
+# Mean of the TBV ratio for DMD patients
+dmd_mean_tbv_ratio <- round(mean(dmd$TBV_Ratio, na.rm = TRUE), 1)
+message("Mean of the TBV ratio of DMD patients:", dmd_mean_tbv_ratio)
+
+# Mean of the TBV ratio for HC patients
+hc_mean_tbv_ratio <- round(mean(hc$TBV_Ratio, na.rm = TRUE), 1)
+message("Mean of the TBV ratio of HC patients:", hc_mean_tbv_ratio)
+```
+
+### Standard Deviation TBV Ratio
+```{r}
+# Standard deviation of the TBV ratio for DMD patients
+dmd_sd_tbv_ratio <- round(sd(dmd$TBV_Ratio, na.rm = TRUE), 1)
+message("Standard deviation of the TBV ratio of DMD patients:", dmd_sd_tbv_ratio)
+
+# Standard deviation of the TBV ratio for HC patients
+hc_sd_tbv_ratio <- round(sd(hc$TBV_Ratio, na.rm = TRUE), 1)
+message("Standard deviation of the TBV ratio of HC patients:", hc_sd_tbv_ratio)
+```
+:::
+
+### Visualize TBV Ratio Distribution
+We use histograms, QQ plots, and boxplots to visualize the distribution of TBV ratios for both groups.
+
+::: {.panel-tabset .nav-pills}
+
+### Histograms
+The histograms display the distribution of TBV ratios for DMD and HC groups.
+```{r}
+# Histograms
+par(mfrow = c(1, 2))
+hist(dmd$TBV_Ratio, main = "TBV ratio of DMD patients", xlab = "TBV ratio DMD", col = "red", breaks = 20)
+hist(hc$TBV_Ratio, main = "TBV ratio of HC patients", xlab = "TBV ratio HC", col = "green", breaks = 20)
+```
+
+### QQ Plots
+The QQ plots are used to compare the distribution of TBV ratios for DMD and HC groups with a normal distribution.
+```{r}
+# QQ plots
+par(mfrow = c(1, 2))
+qqnorm(dmd$TBV_Ratio, main = "QQ plot of TBV ratio of DMD patients")
+qqline(dmd$TBV_Ratio, col = "red")
+qqnorm(hc$TBV_Ratio, main = "QQ plot of TBV ratio of HC patients")
+qqline(hc$TBV_Ratio, col = "green")
+```
+
+### Boxplots
+The boxplots visualize the distribution of TBV ratios for DMD and HC groups.
+```{r}
+par(mfrow = c(1, 2))
+bb <- boxplot(dmd$TBV_Ratio, main = "TBV ratio of DMD patients", col = "red")
+boxplot(hc$TBV_Ratio, main = "TBV ratio of HC patients", col = "green")
+```
+
+:::
+
+### Density Plots
+We create density plots to further examine the distribution of TBV ratios for both DMD and HC groups.
+```{r}
+# Density plots
+par(mfrow = c(1, 2))
+plot(density(dmd$TBV_Ratio, na.rm = TRUE), main = "Density TBV ratio of DMD", col = "red")
+plot(density(hc$TBV_Ratio, na.rm = TRUE), main = "Density TBV ratio of HC", col = "green")
+```
+
+### Scatter Plots and Correlation
+These scatter plots visualize the relationship between age and TBV ratio, and the correlation is calculated for both groups
+
+::: {.panel-tabset .nav-pills}
+#### Scatter Plots
+We create scatter plots to visualize the relationship between age and TBV ratio for both DMD and HC groups.
+```{r}
+# Scatter plots
+par(mfrow = c(1, 2))
+plot(dmd$Age, dmd$TBV_Ratio, main = "Scatter Age and TBV ratio of DMD", col = "red")
+plot(hc$Age, hc$TBV_Ratio, main = "Scatter Age and TBV ratio of HC", col = "green")
+```
+
+#### Correlation
+We calculate the correlation between age and TBV ratio for both DMD and HC groups.
+```{r}
+# Correlation
+correlation_dmd <- round(cor(dmd$Age, dmd$TBV_Ratio, use = "complete.obs"), 2)
+correlation_hc <- round(cor(hc$Age, hc$TBV_Ratio, use = "complete.obs"), 2)
+message("Correlation between Age and TBV ratio of DMD:", correlation_dmd)
+message("Correlation between Age and TBV ratio of HC:", correlation_hc)
+```
+
+:::
+
+
+### Linear Regression Analysis
+We perform linear regression analysis to assess the relationship between age and TBV ratio for both groups. The results are displayed in the summary output.
+
+::: {.panel-tabset .nav-pills}
+
+### DMD
+```{r}
+# Linear regression of DMD
+lm_dmd <- lm(dmd$TBV_Ratio ~ dmd$Age)
+print(summary(lm_dmd))
+```
+
+### HC
+```{r}
+# Linear regression of HC
+lm_hc <- lm(hc$TBV_Ratio ~ hc$Age)
+print(summary(lm_hc))
+```
+
+:::
+
+### Plot Linear Regression
+Here we plot the linear regression of DMD and HC groups to visualize the relationship between age and TBV ratio. The blue line represents the linear regression line.
+```{r}
+# Plot linear regression
+par(mfrow = c(1, 2))
+plot(dmd$Age, dmd$TBV_Ratio, main = "Linear regression of DMD", col = "red")
+abline(lm_dmd, col = "blue")
+plot(hc$Age, hc$TBV_Ratio, main = "Linear regression of HC", col = "green")
+abline(lm_hc, col = "blue")
+```
+
+### Noramity Test
+We apply the Shapiro-Wilk test to check the normality of the TBV distributions for both groups.
+
+::: {.panel-tabset .nav-pills}
+### DMD
+```{r}
+# Shapiro-Wilk normality test for DMD
+print(shapiro.test(dmd$TBV_Ratio))
+```
+
+### HC
+```{r}
+# Shapiro-Wilk normality test for HC
+print(shapiro.test(hc$TBV_Ratio))
+```
+:::
+
+
