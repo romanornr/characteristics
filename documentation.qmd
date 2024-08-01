@@ -131,7 +131,7 @@ hc_kids_uk <- hc[grepl("^DMDBUK", hc$ID), ]       # UK kids
 :::
 ------------------------------------------------------------------------
 
-### Categorize patients into different (age) groups
+### Count the number of patients in each subgroup
 ::: {.panel-tabset .nav-pills}
 ### DMD
 
@@ -184,6 +184,8 @@ message("HC amount of UK kids:", nrow(hc_kids_uk))
 
 :::
 
+### Map Visualization of countries with patients
+Here we visualize the countries where the patients are. Our dataset contains patients from the Netherlands and the UK. We will plot the countries on the map to visualize the distribution of patients.
 
 ```{r}
 # Load the required package
