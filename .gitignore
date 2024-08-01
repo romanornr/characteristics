@@ -2,3 +2,11 @@ confidential/*
 *.csv
 *.xlsx
 .Rproj.user
+packrat/lib*/
+# Ignore the renv library folder
+renv/library/
+
+# Optionally ignore temporary files
+.Rhistory
+.RData
+.Rproj.user
