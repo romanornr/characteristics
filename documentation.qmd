@@ -795,7 +795,7 @@ t_test <- t.test(dmd$TBV_Ratio, hc$TBV_Ratio)
 print(t_test)
 ```
 
-## Mutation Group an analysis 
+## Mutation Group analysis 
 
 We will analyze the mutation group for both DMD and HC patients to determine the number of patients in each group.
 
@@ -906,6 +906,106 @@ print_group_percentages("DMD", dmd_mutation, "mutation_group")
 # Calculate the percentage of patients in each mutation group for HC
 hc_mutation <- categorize_mutation(hc)
 print_group_percentages("HC", hc_mutation, "mutation_group")
+```
+
+:::
+
+
+## Corticosteroid Analysis
+
+We will analyze the corticosteroid treatment for both DMD and HC patients to determine the number of patients in each group.
+
+### Assign patients to corticosteroid groups based on the Corticosteroid column
+```{r}
+categorize_corticosteroid <- function(df) {
+  df %>%
+    mutate(
+      corticosteroid_group = case_when(
+        Corticosteroid == 0 ~ "No",
+        Corticosteroid == 1 ~ "Yes",
+        Corticosteroid == 2 ~ "Unknown"
+      )
+    )
+}
+```
+
+### Count the number of patients in each corticosteroid group
+
+::: {.panel-tabset .nav-pills}
+### DMD
+```{r}
+# Assign corticosteroid groups to DMD dataset
+dmd_corticosteroid <- categorize_corticosteroid(dmd)
+
+# Output the number of patients in each corticosteroid group
+corticosteroid_group <- unique(dmd_corticosteroid$corticosteroid_group)
+
+# DMD Corticosteroid Group Analysis
+for (corticosteroid_group in corticosteroid_group) {
+  patients_count <- nrow(dmd_corticosteroid[dmd_corticosteroid$corticosteroid_group == corticosteroid_group, ])
+  message("DMD patients with corticosteroid group ", corticosteroid_group, " is: ", patients_count)
+}
+
+```
+
+### HC
+```{r}
+# Assign corticosteroid groups to HC dataset
+hc_corticosteroid <- categorize_corticosteroid(hc)
+
+# Output the number of patients in each corticosteroid group
+corticosteroid_group <- unique(hc_corticosteroid$corticosteroid_group)
+
+# HC Corticosteroid Group Analysis
+for (corticosteroid_group in corticosteroid_group) {
+  patients_count <- nrow(hc_corticosteroid[hc_corticosteroid$corticosteroid_group == corticosteroid_group, ])
+  message("HC patients with corticosteroid group ", corticosteroid_group, " is: ", patients_count)
+}
+```
+
+:::
+
+### Calculate the percentage of patients in each corticosteroid group
+
+We calculate the percentage of patients in each corticosteroid group for both DMD and HC groups. The percentage is calculated as `(100 / total number of patients) * number of patients in each corticosteroid group`.
+
+
+```{r}
+print_group_percentages <- function(patient_type, df, group_column) {
+  if (!(group_column %in% names(df))) {
+    stop(paste("Column", group_column, "does not exist in the dataframe."))
+  }
+  
+  df <- df %>% filter(!is.na(!!sym(group_column)))
+  
+  # Calculate group percentages and output the results
+  group_counts <- df %>%
+    count(!!sym(group_column)) %>%
+    mutate(percentage = round(100 / sum(n) * n, 1))
+  
+  message(patient_type, " results :")
+  #message(patient_type, " patients by ", group_column, " :")
+  print(group_counts)
+                      
+}
+```
+
+Now we calculate the percentage of patients in each corticosteroid group for both DMD and HC groups.
+
+::: {.panel-tabset .nav-pills}
+### DMD
+
+```{r}
+# Calculate the percentage of patients in each corticosteroid group for DMD
+dmd_corticosteroid <- categorize_corticosteroid(dmd)
+print_group_percentages("DMD", dmd_corticosteroid, "corticosteroid_group")
+```
+
+### HC
+```{r}
+# Calculate the percentage of patients in each corticosteroid group for HC
+hc_corticosteroid <- categorize_corticosteroid(hc)
+print_group_percentages("HC", hc_corticosteroid, "corticosteroid_group")
 ```
 
 :::
