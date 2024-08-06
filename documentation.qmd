@@ -706,6 +706,30 @@ message("Correlation between Age and TBV ratio of HC:", correlation_hc)
 ```
 :::
 
+
+### Pearson Correlation Test
+
+We perform a Pearson correlation test to assess the relationship between age and TBV ratio for both groups.
+
+::: {.panel-tabset .nav-pills}
+
+### DMD
+```{r}
+# Pearson correlation test
+cor_test_dmd <- cor.test(dmd$Age, dmd$TBV_Ratio)
+print(cor_test_dmd)
+```
+
+
+### HC
+```{r}
+# Pearson correlation test
+cor_test_hc <- cor.test(hc$Age, hc$TBV_Ratio)
+print(cor_test_hc)
+```
+
+:::
+
 ### Linear Regression Analysis
 
 We perform linear regression analysis to assess the relationship between age and TBV ratio for both groups. The results are displayed in the summary output.
