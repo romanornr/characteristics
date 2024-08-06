@@ -189,7 +189,103 @@ message("HC amount of NL kids:", nrow(hc_kids_nl))
 message("DMD amount of UK kids:", nrow(dmd_kids_uk))
 message("HC amount of UK kids:", nrow(hc_kids_uk))
 ```
+
 :::
+
+------------------------------------------------------------------------
+
+### Mean and Standard Deviation of Age
+
+We calculate the mean and standard deviation of the age for both DMD and HC patients to understand the distribution of ages in each group.
+
+::: {.panel-tabset .nav-pills}
+
+### Mean Age
+We calculate the mean of the age for both DMD and HC patients by using the `mean` function. 
+
+```{r}
+mean_dmd_age <- round(mean(dmd$Age, na.rm = TRUE), 1)
+message("Mean age of DMD patients:", mean_dmd_age)
+mean_hc_age <- round(mean(hc$Age, na.rm = TRUE), 1)
+message("Mean age of HC patients:", mean_hc_age)
+
+```
+
+### Standard Deviation Age
+We also calculate the standard deviation of the age for both groups using the `sd` function.
+
+```{r}
+sd_dmd_age <- round(sd(dmd$Age, na.rm = TRUE), 1)
+message("Standard deviation of DMD patients age:", sd_dmd_age)
+
+sd_hc_age <- round(sd(hc$Age, na.rm = TRUE), 1)
+message("Standard deviation of HC patients age:", sd_hc_age)
+
+```
+
+:::
+
+
+------------------------------------------------------------------------
+
+## Descriptive analysis
+Here we will perform a descriptive analysis of the dataset to understand the distribution of ages for DMD and HC patients. We will create box plots, histograms, and QQ plots to visualize the age distribution of patients in each group.
+
+### Box plots age distribution
+
+We will create box plots to visualize the distribution of ages for DMD and HC patients. The box plots will help us understand the age distribution of patients in each group. We will use the `boxplot` function to create the plots
+```{r}
+# on the y-axis we need to label it age and on the x-axis we need to label it DMD and HC
+par(mfrow = c(1, 2))
+boxplot(dmd$Age, main = "DMD Age Distribution", ylab = "Age", col = "red")
+boxplot(hc$Age, main = "HC Age Distribution", ylab = "Age", col = "green")
+```
+
+### histogram plots age distribution
+We will create histograms to visualize the age distribution of DMD and HC patients. The histograms will help us understand the distribution of ages in each group. We will use the `hist` function to create the plots.
+
+```{r}
+# Create histograms to visualize the age distribution of DMD and HC patients
+par(mfrow = c(1, 2))
+hist(dmd$Age, main = "DMD Age Distribution", xlab = "Age", col = "red")
+hist(hc$Age, main = "HC Age Distribution", xlab = "Age", col = "green")
+```
+
+### qq plots age distribution
+We will create QQ plots to compare the age distribution of DMD and HC patients with a normal distribution. The QQ plots will help us understand if the age distribution is normal or not. We will use the `qqnorm` and `qqline` functions to create the plots.
+
+
+```{r}
+# Create QQ plots to compare the age distribution of DMD and HC patients with a normal distribution
+par(mfrow = c(1, 2))
+qqnorm(dmd$Age, main = "QQ plot of DMD Age Distribution"); qqline(dmd$Age, col = "red")
+qqnorm(hc$Age, main = "QQ plot of HC Age Distribution"); qqline(hc$Age, col = "green")
+```
+
+### Safiro Wilk Test for Age Distribution
+::: {.panel-tabset .nav-pills}
+### DMD
+```{r}
+# Shapiro-Wilk normality test for DMD age distribution
+print(shapiro.test(dmd$Age))
+```
+### HC
+```{r}
+# Shapiro-Wilk normality test for HC age distribution
+print(shapiro.test(hc$Age))
+```
+
+:::
+
+### Density Plots for Age Distribution
+```{r}
+# Create density plots to visualize the age distribution of DMD and HC patients
+par(mfrow = c(1, 2))
+plot(density(dmd$Age, na.rm = TRUE), main = "Density DMD Age Distribution", col = "red")
+plot(density(hc$Age, na.rm = TRUE), main = "Density HC Age Distribution", col ="green")
+```
+
+
 
 ### Map Visualization of countries with patients
 
