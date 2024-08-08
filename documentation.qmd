@@ -23,6 +23,11 @@ library(DT)
 library(plotly)
 library(car)
 library(readxl)
+library(lme4)
+library(lmerTest)
+library(splines)
+library(rms)
+library(mgcv)
 
 read_excel_file <- function() {
   file_path <- "DATASET_V6_SMO.xlsx"
@@ -1080,6 +1085,46 @@ hist(model$residuals)
 
 :::
 
+
+To prepare the data for the linear regression analysis, we will add a new column `Age^2` to the data frame to model the quadratic relationship between the TBV ratio and age of the patients.
+
+```{r}
+# For the quadratic model, we can add a new column Age^2 to the data frame
+all_patients <- all_patients %>%
+  mutate(Age2 = Age^2)
+
+all_patients %>%
+  select(ID, Age, Age2) %>%
+  mutate(Age2_formatted = sprintf("%.1f", Age2)) %>%
+  print(n = Inf)
+
+```
+
+### Quadratic Model for TBV Ratio and Age
+For the quadratic model, we will fit a linear regression model to predict the TBV ratio based on the age and age squared of the patients. We will then print the summary of the model to assess the model fit.
+
+```{r}
+# Fit a quadratic model to the data
+model.Age2 <- lm(TBV_Ratio ~ Age + Age2, data = all_patients)
+summary(model.Age2)
+
+```
+
+### Linear Mixed-Effects Model
+
+Here with model.fit0 we will fit a linear mixed-effects model to predict the TBV ratio based on the age, age squared, and scanner type of the patients. We will then print the summary of the model to assess the model fit.
+```{r}
+model.fit0 <- lmer(TBV_Ratio ~ (1 | ID) + Age + Age2 + Scannertype, data = all_patients)
+summary(model.fit0)
+
+```
+
+
+With model.fit we will fit a linear mixed-effects model to predict the TBV ratio based on the age, age squared, and group of the patients. We will then print the summary of the model to assess the model fit.
+```{r}
+model.fit <- lmer(TBV_Ratio ~ (1 | ID) + Age + Age2 + group + (group * Age) + (group * Age2), data = all_patients)
+summary(model.fit)
+```
 
 ## Linear Regression Analysis
 

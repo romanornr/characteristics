@@ -106,7 +106,7 @@ all_patients <- all_patients %>%
   
 all_patients %>%
   select(ID, Age, Age2) %>%
-  mutate(Age2_formatted = sprintf("%.2f", Age2)) %>%
+  #mutate(Age2_formatted = sprintf("%.2f", Age2)) %>%
   print(n = Inf)
 
 
