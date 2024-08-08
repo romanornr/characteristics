@@ -25,7 +25,7 @@ library(car)
 library(readxl)
 
 read_excel_file <- function() {
-  file_path <- "DATASET_V5_SMO.xlsx"
+  file_path <- "DATASET_V6_SMO.xlsx"
   if (!file.exists(file_path)) stop("File does not exist")
   dataset <- read_excel(file_path)
   return (dataset)
@@ -1034,5 +1034,78 @@ print_group_percentages("HC", hc_corticosteroid, "corticosteroid_group")
 
 :::
 
+## Inferential statistics
+
+We will perform inferential statistics to compare the TBV ratio between DMD and HC groups. We will conduct a t-test to determine if there is a significant difference in the TBV ratio between the two groups.
 
 
+### Combine DMD and HC datasets
+
+
+Here we combine the DMD and HC datasets to perform inferential statistics on the TBV ratio between the two groups.
+
+```{r}
+# Combine DMD and HC datasets
+all_patients <- rbind(dmd, hc)
+all_patients <- all_patients %>%
+  mutate(group = ifelse(Disease == 1, "DMD", "HC"))
+```
+
+
+### T-Test for TBV Ratio and Group Comparison 
+We model the TBV ratio as a function of the group and age of the patients using a linear regression model. We then plot the diagnostic plots for the linear model to assess the model assumptions.
+
+In the right tab we will perform a linear regression analysis to predict the brain volume based on the age and group of the patients.
+
+::: {.panel-tabset .nav-pills}
+
+### T-Test
+
+```{r}
+model <- lm(TBV_Ratio ~ Age, data = all_patients)
+summary(model)
+```
+
+### Linear Regression Analysis
+
+```{r}
+# Create a scatter plot of the TBV ratio and age
+# Plot the diagnostic plots for the linear model
+# 1: Residuals vs Fitted
+# 2: Normal Q-Q
+plot(model, c(1, 2))
+# Create a histogram of the residuals
+hist(model$residuals)
+```
+
+:::
+
+
+## Linear Regression Analysis
+
+Here we will perform a linear regression analysis to predict the brain volume based on the age and group of the patients.
+
+
+```{r}
+clean_data <- all_patients[is.finite(all_patients$Age) & is.finite(all_patients$TBV), ]
+model <- lm(TBV ~ Age, data = clean_data)
+plot(all_patients$Age, all_patients$TBV, xlab = "Age", ylab = "TBV cm^3", pch = 20, col = "grey35")
+
+
+# GLM model to predict the brain volume based on the age and group
+# y = B0 + B1 * x1 + B2 * x2 + B3 * x1 * x2
+# y = B0 + B1 * x1 + B2 * x2 + B3 * Bn * Xn + e
+# B1 * x1 is the central determinent of the model
+# B2 * x2 are the covariants of the model
+model <- lm(TBV ~ Age, data = dmd)
+model2 <- lm(TBV ~ Age, data = hc)
+print(summary(model))
+print(summary(model2))
+
+
+
+plot(clean_data$Age, clean_data$TBV, xlab = "Age", ylab = "TBV cm^3",
+pch = 20, col = "grey35")
+abline(lm(TBV ~ Age, data = clean_data), col = "red")
+lines(lowess(clean_data$Age, clean_data$TBV), col = "blue", lty = "longdash")
+```
