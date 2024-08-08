@@ -1093,10 +1093,10 @@ To prepare the data for the linear regression analysis, we will add a new column
 all_patients <- all_patients %>%
   mutate(Age2 = Age^2)
 
-all_patients %>%
-  select(ID, Age, Age2) %>%
-  mutate(Age2_formatted = sprintf("%.1f", Age2)) %>%
-  print(n = Inf)
+#all_patients %>%
+  #select(ID, Age, Age2) %>%
+  #mutate(Age2_formatted = sprintf("%.1f", Age2)) %>%
+  #print(n = Inf)
 
 ```
 
@@ -1125,6 +1125,32 @@ With model.fit we will fit a linear mixed-effects model to predict the TBV ratio
 model.fit <- lmer(TBV_Ratio ~ (1 | ID) + Age + Age2 + group + (group * Age) + (group * Age2), data = all_patients)
 summary(model.fit)
 ```
+
+
+### ANOVA Test
+By using the `anova` function, we will perform an analysis of variance (ANOVA) to compare the linear mixed-effects models `model.fit0` and `model.fit` to determine if the group variable significantly improves the model fit.
+
+```{r}
+anova(model.fit0, model.fit)
+```
+
+Here we will perform a linear regression analysis to predict the brain volume based on the age and group of the patients.
+
+```{r}
+# Scatterplot of TBV ratio vs Age
+p <- ggplot(all_patients, aes(x = Age, y = TBV, color = group)) +
+  geom_point(na.rm = TRUE) +
+  labs(title = "Scatterplot of Brain Volume", x = "Age", y = "TBV", color = "Group") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  scale_color_manual(values = c("DMD" = "red", "HC" = "green")) +
+  #theme_ft_rc()
+  theme_classic()
+
+p <- ggplotly(p)
+p
+```
+
 
 ## Linear Regression Analysis
 
