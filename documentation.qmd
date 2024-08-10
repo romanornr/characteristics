@@ -1158,10 +1158,11 @@ p
 ## brain volume 
 
 ```{r}
+# Scatterplot of TBV vs Age with color and shape by group and scanner type
 ggplot(all_patients, aes(x= Age, y = TBV, color = group)) +
-  geom_point() +
+  geom_point(aes(shape = as.factor(Scannertype))) +
   geom_smooth(method = "lm", se = FALSE) +
-  labs(title = "Brain Volume vs Age", x = "Age", y = "TBV", color = "Group") +
+  labs(title = "Brain Volume vs Age", x = "Age", y = "TBV", color = "Group", shape = "Scanner Type") +
   theme_minimal()
 
 p <- ggplotly(p)
