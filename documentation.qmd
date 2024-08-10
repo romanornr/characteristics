@@ -1155,15 +1155,42 @@ p
 ```
 
 
-## brain volume 
+## brain volume vs age
+
+
+### Scatterplot of TBV vs Age
 
 ```{r}
 # Scatterplot of TBV vs Age with color and shape by group and scanner type
-ggplot(all_patients, aes(x= Age, y = TBV, color = group)) +
+p <- ggplot(all_patients, aes(x= Age, y = TBV, color = group)) +
   geom_point(aes(shape = as.factor(Scannertype))) +
   geom_smooth(method = "lm", se = FALSE) +
+  scale_shape_discrete(name = "Scanner Type") +  # Separate legend for shape
+  scale_color_discrete(name = "Group") +         # Separate legend for color
   labs(title = "Brain Volume vs Age", x = "Age", y = "TBV", color = "Group", shape = "Scanner Type") +
-  theme_minimal()
+  theme_bw()
+
+p <- ggplotly(p)
+p
+```
+
+
+### Scatterplot of TBV vs Age faucet by scanner type
+
+Here we will create a scatterplot of the brain volume (TBV) vs age for all patients. We will color and shape the points by group and scanner type to visualize the distribution of brain volume with respect to age.
+
+The scatterplot will be faceted by scanner type to compare the relationship between brain volume and age across different scanners.
+
+The faucet_wrap function is used to create a separate scatterplot for each scanner type.
+
+```{r}
+# Scatterplot of TBV vs Age with color and shape by group and scanner type
+p <- ggplot(all_patients, aes(x= Age, y = TBV, color = group)) +
+  geom_point(aes(shape = as.factor(Scannertype))) +
+  geom_smooth(method = "lm", se = FALSE) +
+  facet_wrap(~ Scannertype) + 
+  labs(title = "Brain Volume vs Age", x = "Age", y = "TBV", color = "Group", shape = "Scanner Type") +
+  theme_bw()
 
 p <- ggplotly(p)
 p
