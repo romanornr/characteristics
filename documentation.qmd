@@ -1048,12 +1048,14 @@ We will perform inferential statistics to compare the TBV ratio between DMD and 
 
 
 Here we combine the DMD and HC datasets to perform inferential statistics on the TBV ratio between the two groups.
+With the is.finite function, we filter out any missing values in the Age and TBV columns. We then create a new column `group` to identify the patients as either DMD or HC.
 
 ```{r}
 # Combine DMD and HC datasets
 all_patients <- rbind(dmd, hc)
 all_patients <- all_patients %>%
-  mutate(group = ifelse(Disease == 1, "DMD", "HC"))
+  mutate(group = ifelse(Disease == 1, "DMD", "HC")) %>%
+  filter(is.finite(Age), is.finite(TBV))
 ```
 
 
@@ -1134,6 +1136,7 @@ By using the `anova` function, we will perform an analysis of variance (ANOVA) t
 anova(model.fit0, model.fit)
 ```
 
+
 Here we will perform a linear regression analysis to predict the brain volume based on the age and group of the patients.
 
 ```{r}
@@ -1146,6 +1149,20 @@ p <- ggplot(all_patients, aes(x = Age, y = TBV, color = group)) +
   scale_color_manual(values = c("DMD" = "red", "HC" = "green")) +
   #theme_ft_rc()
   theme_classic()
+
+p <- ggplotly(p)
+p
+```
+
+
+## brain volume 
+
+```{r}
+ggplot(all_patients, aes(x= Age, y = TBV, color = group)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "Brain Volume vs Age", x = "Age", y = "TBV", color = "Group") +
+  theme_minimal()
 
 p <- ggplotly(p)
 p
