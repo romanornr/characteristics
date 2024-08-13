@@ -843,15 +843,14 @@ We will analyze the corticosteroid treatment for both DMD and HC patients to det
 
 ### Assign patients to corticosteroid groups based on the Corticosteroid column
 ```{r}
-categorize_corticosteroid <- function(df) {
-  df %>%
-    mutate(
-      corticosteroid_group = case_when(
-        Corticosteroid == 0 ~ "No",
-        Corticosteroid == 1 ~ "Yes",
-        Corticosteroid == 2 ~ "Unknown"
-      )
-    )
+categorize_corticosteroid <- function(corticosteroid) {
+  case_when(
+    is.na(corticosteroid) ~ NA_character_,
+    corticosteroid == 0 ~ "No",
+    corticosteroid == 1 ~ "Yes",
+    corticosteroid == 2 ~ "Unknown",
+    TRUE ~ "Other"
+  )
 }
 ```
 
@@ -859,24 +858,24 @@ categorize_corticosteroid <- function(df) {
 
 We calculate the percentage of patients in each corticosteroid group for both DMD and HC groups. The percentage is calculated as `(100 / total number of patients) * number of patients in each corticosteroid group`.
 
-
 ```{r}
-print_group_percentages <- function(patient_type, df, group_column) {
-  if (!(group_column %in% names(df))) {
+display_group_numbers <- function(df, group_name, group_column) {
+  if (!group_column %in% names(df)) {
     stop(paste("Column", group_column, "does not exist in the dataframe."))
   }
   
   df <- df %>% filter(!is.na(!!sym(group_column)))
+  total_patients <- nrow(df)
+  
+  groups <- unique(df[[group_column]])
   
   # Calculate group percentages and output the results
   group_counts <- df %>%
     count(!!sym(group_column)) %>%
     mutate(percentage = round(100 / sum(n) * n, 1))
   
-  message(patient_type, " results :")
-  #message(patient_type, " patients by ", group_column, " :")
+  message(group_name, " patients by ", group_column, ":")
   print(group_counts)
-                      
 }
 ```
 
@@ -886,16 +885,18 @@ Now we calculate the percentage of patients in each corticosteroid group for bot
 ### DMD
 
 ```{r}
-# Calculate the percentage of patients in each corticosteroid group for DMD
-dmd_corticosteroid <- categorize_corticosteroid(dmd)
-print_group_percentages("DMD", dmd_corticosteroid, "corticosteroid_group")
+dmd_corticosteroid <- dmd %>% 
+  mutate(corticosteroid_group = categorize_corticosteroid(Corticosteroid))
+
+display_group_numbers(dmd_corticosteroid, "DMD", "corticosteroid_group")
 ```
 
 ### HC
 ```{r}
-# Calculate the percentage of patients in each corticosteroid group for HC
-hc_corticosteroid <- categorize_corticosteroid(hc)
-print_group_percentages("HC", hc_corticosteroid, "corticosteroid_group")
+hc_corticosteroid <- hc %>% 
+  mutate(corticosteroid_group = categorize_corticosteroid(Corticosteroid))
+
+display_group_numbers(hc_corticosteroid, "HC", "corticosteroid_group")
 ```
 
 :::
