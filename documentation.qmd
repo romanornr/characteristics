@@ -780,115 +780,62 @@ We will analyze the mutation group for both DMD and HC patients to determine the
 ### Assign patients to mutation groups based on the Mutation column
 
 ```{r}
-categorize_mutation <- function(df) {
-  df %>%
-    mutate(
-      mutation_group = case_when(
-        Mutation == 0 ~ "Healthy",
-        Mutation == 1 ~ "Proximal",
-        Mutation == 2 ~ "Distal",
-        Mutation == 3 ~ "Unknown",
-      )
-    )
+# categorize_mutation function to categorize patients into different mutation groups
+categorize_mutation <- function(mutation) {
+  case_when(
+    mutation == 0 ~ "Healthy",
+    mutation == 1 ~ "Proximal",
+    mutation == 2 ~ "Distal",
+    mutation == 3 ~ "Unknown",
+    TRUE ~ NA_character_
+  )
 }
 ```
 
-### Count the number of patients in each mutation group
 
+### Count the number of patients in each mutation group and percentage
+
+::: callout-note
+We calculate the percentage of patients in each mutation group for both DMD and HC groups. The percentage is calculated as `(100 / total number of patients) * number of patients in each mutation group`. 
+
+:::
+
+::: callout-note
+Mutation Groups: Defined as "Healthy," "Proximal," "Distal," and "Unknown."
+:::
+
+```{r}
+mutation_groups <- c("Healthy", "Proximal", "Distal", "Unknown")
+
+display_mutation_groups <- function(df, group_name) {
+  df <- df %>% mutate(mutation_group = categorize_mutation(Mutation))
+  
+  total_patients <- nrow(df)
+  
+  message(group_name, " patients by mutation group:")
+  for (group in mutation_groups) {
+    count <- sum(df$mutation_group == group, na.rm = TRUE)
+    percentage <- round(100 / total_patients * count, 1)
+    message(sprintf("%s: %d (%.1f%%)", group, count, percentage))
+  }
+}
+```
 
 ::: {.panel-tabset .nav-pills}
 
 ### DMD
 ```{r}
-# Assign mutation groups to DMD dataset
-dmd_mutation <- categorize_mutation(dmd)
-
-# Output the number of patients in each mutation group
-mutation_group <- unique(dmd_mutation$mutation_group)
-
-# DMD Mutation Group Analysis
-for (mutation_group in mutation_group) {
-  patients_count <- nrow(dmd_mutation[dmd_mutation$mutation_group == mutation_group, ])
-  message("DMD patients with mutation group ", mutation_group, " is: ", patients_count)
-}
+dmd_mutation <- dmd %>% mutate(mutation_group = categorize_mutation(Mutation))
+display_mutation_groups(dmd_mutation, "DMD")
 ```
 
 ### HC 
 ```{r}
-# Assign mutation groups to DMD dataset
-hc_mutation <- categorize_mutation(hc)
-
-# Output the number of patients in each mutation group
-mutation_group <- unique(hc_mutation$mutation_group)
-
-# DMD Mutation Group Analysis
-for (mutation_group in mutation_group) {
-  patients_count <- nrow(hc_mutation[hc_mutation$mutation_group == mutation_group, ])
-  message("HC patients with mutation group ", mutation_group, " is: ", patients_count)
-}
-
+hc_mutation <- hc %>% mutate(mutation_group = categorize_mutation(Mutation))
+display_mutation_groups(hc_mutation, "HC")
 ```
 
 :::
-
-### Calculate the percentage of patients in each mutation group
-
-We calculate the percentage of patients in each mutation group for both DMD and HC groups. The percentage is calculated as `(100 / total number of patients) * number of patients in each mutation group`. 
-
-```{r}
-print_group_percentages <- function(patient_type, df, group_column) {
-  if (!(group_column %in% names(df))) {
-    stop(paste("Column", group_column, "does not exist in the dataframe."))
-  }
-
-  # Filter out rows with NA values in the specified group column
-  df_filtered <- df[!is.na(df[[group_column]]), ]
-
-  # Check if there are any unique values left in the specified group column
-  if (length(unique(df_filtered[[group_column]])) == 0) {
-    stop("No unique values found in the specified group column.")
-  }
-
-  groups <- unique(df_filtered[[group_column]])
-  print(groups)
-
-  total_patients <- nrow(df_filtered)
-  print(total_patients)
-  print(nrow(df))
-
-  for (group in groups) {
-    if (!is.na(group)) {
-      patients_count <- nrow(df_filtered[df_filtered[[group_column]] == group, ])
-#       print(patients_count)
-#       print(total_patients)
-      percentage <- round(100 / total_patients * patients_count, 3)
-      #percentage <- round(patients_count / total_patients * 100, 1)
-      message("Percentage of ", patient_type, " patients with mutation group ", group, " is: ", percentage, "%")
-    }
-  }
-}
-```
-
-
-Now we calculate the percentage of patients in each mutation group for both DMD and HC groups.
-
-::: {.panel-tabset .nav-pills}
-### DMD
-```{r}
-# Calculate the percentage of patients in each mutation group for DMD
-dmd_mutation <- categorize_mutation(dmd)
-print_group_percentages("DMD", dmd_mutation, "mutation_group")
-```
-
-### HC
-```{r}
-# Calculate the percentage of patients in each mutation group for HC
-hc_mutation <- categorize_mutation(hc)
-print_group_percentages("HC", hc_mutation, "mutation_group")
-```
-
-:::
-
 
 ## Corticosteroid Analysis
 
