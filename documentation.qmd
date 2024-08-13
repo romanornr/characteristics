@@ -341,145 +341,83 @@ points(x=data$long, y=data$lat, col="darkred", cex=2.5, pch=19)
 
 ------------------------------------------------------------------------
 
-## Visit Analysis
+## Age Group Analysis
 
-### Filter data by the visit column
-
-First we filter the data by the visit column to get the unique values in the column.
-
-```{r}
-# Filter data based on visit numbers
-dmd_first_visit <- dmd %>% filter(Visit == 1)
-dmd_second_visit <- dmd %>% filter(Visit == 2)
-hc_first_visit <- hc %>% filter(Visit == 1)
-hc_second_visit <- hc %>% filter(Visit == 2)
-```
-
-### Count the number of patients in each group
-
-Next we output the number of patients in each group for the first and second visit.
-
-::: {.panel-tabset .nav-pills}
-### DMD
-
-```{r}
-message("DMD second and first visit: ", nrow(dmd))
-message("DMD first visit:", nrow(dmd_first_visit))
-message("DMD second visit:", nrow(dmd_second_visit), "\n")
-
-```
-
-### HC
-
-```{r}
-message("HC second and first visit: ", nrow(hc))
-message("HC first visit:", nrow(hc_first_visit))
-message("HC second visit:", nrow(hc_second_visit), "\n")
-
-```
-:::
-
-------------------------------------------------------------------------
+We want to categorize patients into different age groups based on the visit number to understand the age distribution of patients. We will categorize patients into the following age groups: 0 - 5 years old, 6 - 12 years old, 13 - 19 years old, 20 - 25 years old, and 26+ years old.
 
 #### Categorize patients into different age groups based on the visit number using the `mutate` and `case_when` functions to get the age distrubution of the patients.
 
-::: {.panel-tabset .nav-pills}
-### DMD
 
 ```{r}
-# Categorize DMD patients based on age groups for the first visit
-dmd_first_visit_ages <- dmd_first_visit %>%
-  mutate(
-    age_group = case_when(
-      Age <= 5 ~ "0 - 5 years old",
-      Age <= 12 ~ "6 - 12 years old",
-      Age <= 19 ~ "13 - 19 years old",
-      Age <= 25 ~ "20 - 25 years old",
-      TRUE ~ "26+ years old"
-    )
+# categorize_age function to categorize patients into different age groups
+categorize_age <- function(age) {
+  case_when(
+    age <= 5 ~ "0 - 5 years old",
+    age <= 12 ~ "6 - 12 years old",
+    age <= 19 ~ "13 - 19 years old",
+    age <= 25 ~ "20 - 25 years old",
+    TRUE ~ "26+ years old"
   )
+}
 
 ```
 
-### HC
-
-```{r}
-
-hc_first_visit_ages <- hc_first_visit %>%
-  mutate(
-    age_group = case_when(
-      Age <= 5 ~ "0 - 5 years old",
-      Age <= 12 ~ "6 - 12 years old",
-      Age <= 19 ~ "13 - 19 years old",
-      Age <= 25 ~ "20 - 25 years old",
-      TRUE ~ "26+ years old"
-    )
-  )
-```
-:::
 
 ::: callout-note
 Age Groups: Defined as "0 - 5 years old," "6 - 12 years old," "13 - 19 years old," "20 - 25 years old," and "26+ years old."
 :::
 
-### Count the number of patients in each age group for the first visit
-
+Here we define a function to display the number of patients in each age group and the percentage of patients in each group.
 ```{r}
-# Define age groups
-age_groups <- c("0 - 5 years old", "6 - 12 years old", "13 - 19 years old", "20 - 25 years old", "26+ years old")
-```
-
-::: {.panel-tabset .nav-pills}
-### DMD
-
-```{r}
-# DMD Age Group Analysis
-message("DMD first visit ages:")
-for (age_group in age_groups) {
-  message(age_group, " dmd patients:", nrow(dmd_first_visit_ages[dmd_first_visit_ages$age_group == age_group, ]))
+# display_age_groups function to display the number of patients in each age group and the percentage of patients in each group
+display_age_groups <- function(df, group_name) {
+  df <- df %>% mutate(age_group = categorize_age(Age))
+  age_groups <- c("0 - 5 years old", "6 - 12 years old", "13 - 19 years old", "20 - 25 years old", "26+ years old")
+  total_patients <- nrow(df)
+  
+  message(group_name, " patients by age group:")
+  for (age_group in age_groups) {
+    count <- nrow(df[df$age_group == age_group, ])
+    percentage <- round(100 / total_patients * count, 1)
+    message(sprintf("%s: %d (%.1f%%)", age_group, count, percentage))
+  }
 }
 ```
 
-### HC
-
-```{r}
-message("HC first visit ages:")
-for (age_group in age_groups) {
-	message(age_group, " hc patients:", nrow(hc_first_visit_ages[hc_first_visit_ages$age_group == age_group, ]))
-}
-```
+::: callout-note
+Percentage calculation: `(100 / total number of patients) * number of patients in each age group`
 :::
 
-### Calculate the percentage of patients in each age group
 
 ::: {.panel-tabset .nav-pills}
-### DMD
+### DMD first visit
 
 ```{r}
-# DMD Age Group Percentage Analysis
-message("DMD Patients first visit in percentages")
-for (age_group in age_groups) {
-  patients_count <- nrow(dmd_first_visit_ages[dmd_first_visit_ages$age_group == age_group, ])
-  percentage <- round((100 / nrow(dmd) * patients_count), 1)
-  message(age_group, " patients in percentage:", percentage, "%")
-}
+dmd_first_visit <- dmd %>% filter(Visit == 1)
+display_age_groups(dmd_first_visit, "DMD first visit")
+
 ```
 
-### HC
+### DMD second visit
 
 ```{r}
-# HC Age Group Percentage Analysis
-for (age_group in age_groups) {
-	patients_count <- nrow(hc_first_visit_ages[hc_first_visit_ages$age_group == age_group, ])
-	percentage <- round((100 / nrow(hc) * patients_count), 1)
-	message(age_group, " patients in percentage:", percentage, "%")
-}
+dmd_second_visit <- dmd %>% filter(Visit == 2)
+display_age_groups(dmd_second_visit, "DMD second visit")
 ```
+
+### HC first visit
+```{r}
+hc_first_visit <- hc %>% filter(Visit == 1)
+display_age_groups(hc_first_visit, "HC first visit")
+```
+
+### HC second visit
+```{r}
+hc_second_visit <- hc %>% filter(Visit == 2)
+display_age_groups(hc_second_visit, "HC second visit")
+```
+
 :::
-
--   Percentage calculation: `(100 / total number of patients) * number of patients in each age group`
-
--   HC Age Group Displays the count of HC patients in each age group for the first visit
 
 ------------------------------------------------------------------------
 
@@ -913,6 +851,7 @@ print_group_percentages <- function(patient_type, df, group_column) {
 #       print(patients_count)
 #       print(total_patients)
       percentage <- round(100 / total_patients * patients_count, 3)
+      #percentage <- round(patients_count / total_patients * 100, 1)
       message("Percentage of ", patient_type, " patients with mutation group ", group, " is: ", percentage, "%")
     }
   }
@@ -1164,7 +1103,7 @@ p
 # Scatterplot of TBV vs Age with color and shape by group and scanner type
 p <- ggplot(all_patients, aes(x= Age, y = TBV, color = group)) +
   geom_point(aes(shape = as.factor(Scannertype))) +
-  geom_smooth(method = "lm", se = FALSE) +
+  geom_smooth(method = "loess", se = FALSE) +
   scale_shape_discrete(name = "Scanner Type") +  # Separate legend for shape
   scale_color_discrete(name = "Group") +         # Separate legend for color
   labs(title = "Brain Volume vs Age", x = "Age", y = "TBV", color = "Group", shape = "Scanner Type") +
