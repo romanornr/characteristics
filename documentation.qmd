@@ -390,7 +390,7 @@ Percentage calculation: `(100 / total number of patients) * number of patients i
 
 
 ::: {.panel-tabset .nav-pills}
-### DMD first visit
+### DMD 1st visit
 
 ```{r}
 dmd_first_visit <- dmd %>% filter(Visit == 1)
@@ -398,25 +398,36 @@ display_age_groups(dmd_first_visit, "DMD first visit")
 
 ```
 
-### DMD second visit
+### DMD 2nd visit
 
 ```{r}
 dmd_second_visit <- dmd %>% filter(Visit == 2)
 display_age_groups(dmd_second_visit, "DMD second visit")
 ```
 
-### HC first visit
+### HC 1st visit
 ```{r}
 hc_first_visit <- hc %>% filter(Visit == 1)
 display_age_groups(hc_first_visit, "HC first visit")
 ```
 
-### HC second visit
+### HC 2nd visit
 ```{r}
 hc_second_visit <- hc %>% filter(Visit == 2)
 display_age_groups(hc_second_visit, "HC second visit")
 ```
 
+### DMD combined
+```{r}
+dmd_combined <- dmd %>% filter(Visit == 1 | Visit == 2)
+display_age_groups(dmd_combined, "DMD combined")
+```
+
+### HC combined
+```{r}
+hc_combined <- hc %>% filter(Visit == 1 | Visit == 2)
+display_age_groups(hc_combined, "HC combined")
+```
 :::
 
 ------------------------------------------------------------------------
