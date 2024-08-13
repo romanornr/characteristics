@@ -89,6 +89,22 @@ dmd <- replace_values_with_na_mutate(dmd, rules)
 hc <- replace_values_with_na_mutate(hc, rules)
 ```
 
+
+### Combine DMD and HC datasets
+
+
+Here we combine the DMD and HC datasets to perform inferential statistics on the TBV ratio between the two groups.
+With the is.finite function, we filter out any missing values in the Age and TBV columns. We then create a new column `group` to identify the patients as either DMD or HC.
+
+```{r}
+# Combine DMD and HC datasets
+all_patients <- rbind(dmd, hc)
+all_patients <- all_patients %>%
+  mutate(group = ifelse(Disease == 1, "DMD", "HC")) %>%
+  filter(is.finite(Age), is.finite(TBV))
+```
+
+
 ::: {.panel-tabset .nav-pills}
 ### DMD
 
@@ -761,8 +777,6 @@ levene_test_tbv <- leveneTest(TBV_Ratio ~ group, data = tbv_lavene_test)
 print(levene_test_tbv)
 ```
 
-------------------------------------------------------------------------
-
 ### T-Test
 
 We perform a t-test to compare the TBV ratio between DMD and HC groups.
@@ -772,6 +786,32 @@ We perform a t-test to compare the TBV ratio between DMD and HC groups.
 t_test <- t.test(dmd$TBV_Ratio, hc$TBV_Ratio)
 print(t_test)
 ```
+
+
+### plot TBV Ratio
+
+```{r}
+baseplot <- ggplot(all_patients, aes(x = Age, y = TBV_Ratio, color = group)) +
+  geom_point(aes(shape = as.factor(Scannertype))) +
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_shape_discrete(name = "Scanner Type") +
+  scale_color_discrete(name = "Group") +
+  labs(title = "TBV Ratio vs Age group", x = "Age", y = "TBV Ratio", color = "Group") +
+  theme_bw()
+
+p <- ggplotly(baseplot)
+p
+```
+
+
+```{r}
+p_faceted <- baseplot + facet_wrap(~ Scannertype)
+p_faceted <- ggplotly(p_faceted)
+p_faceted
+```
+
+
+------------------------------------------------------------------------
 
 ## Mutation Group analysis 
 
@@ -904,21 +944,6 @@ display_group_numbers(hc_corticosteroid, "HC", "corticosteroid_group")
 ## Inferential statistics
 
 We will perform inferential statistics to compare the TBV ratio between DMD and HC groups. We will conduct a t-test to determine if there is a significant difference in the TBV ratio between the two groups.
-
-
-### Combine DMD and HC datasets
-
-
-Here we combine the DMD and HC datasets to perform inferential statistics on the TBV ratio between the two groups.
-With the is.finite function, we filter out any missing values in the Age and TBV columns. We then create a new column `group` to identify the patients as either DMD or HC.
-
-```{r}
-# Combine DMD and HC datasets
-all_patients <- rbind(dmd, hc)
-all_patients <- all_patients %>%
-  mutate(group = ifelse(Disease == 1, "DMD", "HC")) %>%
-  filter(is.finite(Age), is.finite(TBV))
-```
 
 
 ### T-Test for TBV Ratio and Group Comparison 
