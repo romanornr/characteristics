@@ -855,42 +855,6 @@ categorize_corticosteroid <- function(df) {
 }
 ```
 
-### Count the number of patients in each corticosteroid group
-
-::: {.panel-tabset .nav-pills}
-### DMD
-```{r}
-# Assign corticosteroid groups to DMD dataset
-dmd_corticosteroid <- categorize_corticosteroid(dmd)
-
-# Output the number of patients in each corticosteroid group
-corticosteroid_group <- unique(dmd_corticosteroid$corticosteroid_group)
-
-# DMD Corticosteroid Group Analysis
-for (corticosteroid_group in corticosteroid_group) {
-  patients_count <- nrow(dmd_corticosteroid[dmd_corticosteroid$corticosteroid_group == corticosteroid_group, ])
-  message("DMD patients with corticosteroid group ", corticosteroid_group, " is: ", patients_count)
-}
-
-```
-
-### HC
-```{r}
-# Assign corticosteroid groups to HC dataset
-hc_corticosteroid <- categorize_corticosteroid(hc)
-
-# Output the number of patients in each corticosteroid group
-corticosteroid_group <- unique(hc_corticosteroid$corticosteroid_group)
-
-# HC Corticosteroid Group Analysis
-for (corticosteroid_group in corticosteroid_group) {
-  patients_count <- nrow(hc_corticosteroid[hc_corticosteroid$corticosteroid_group == corticosteroid_group, ])
-  message("HC patients with corticosteroid group ", corticosteroid_group, " is: ", patients_count)
-}
-```
-
-:::
-
 ### Calculate the percentage of patients in each corticosteroid group
 
 We calculate the percentage of patients in each corticosteroid group for both DMD and HC groups. The percentage is calculated as `(100 / total number of patients) * number of patients in each corticosteroid group`.
