@@ -707,7 +707,64 @@ print(cor_test_hc)
 
 :::
 
-### Linear Regression Analysis
+
+## TBV Analysis
+
+We will analyze the TBV for both DMD and HC patiens
+
+### Calculate Mean and Standard Deviation of TBV
+We first calculate the mean and standard deviation of the TBV for both DMD and HC groups.
+
+::: {.panel-tabset .nav-pills}
+### Mean TBV
+```{r}
+dmd_tbv_mean <- round(mean(dmd$TBV, na.rm = TRUE), 1)
+message("Mean TBV of DMD patients:", dmd_tbv_mean)
+
+hc_tbv_mean <- round(mean(hc$TBV, na.rm = TRUE), 1)
+message("Mean TBV of HC patients:", hc_tbv_mean)
+```
+
+### Standard Deviation TBV
+```{r}
+dmd_tbv_sd <- round(sd(dmd$TBV, na.rm = TRUE), 1)
+message("Standard deviation of TBV of DMD patients:", dmd_tbv_sd)
+
+hc_tbv_sd <- round(sd(hc$TBV, na.rm = TRUE), 1)
+message("Standard deviation of TBV of HC patients:", hc_tbv_sd)
+```
+
+:::
+
+## GMV analysis
+
+We will analyze the GMV for both DMD and HC patients
+
+::: {.panel-tabset .nav-pills}
+### Mean GMV
+```{r}
+dmd_gmv_mean <- round(mean(dmd$GMV, na.rm = TRUE), 1)
+message("Mean GMV of DMD patients:", dmd_gmv_mean)
+
+hc_gmv_mean <- round(mean(hc$GMV, na.rm = TRUE), 1)
+message("Mean GMV of HC patients:", hc_gmv_mean)
+```
+
+
+### Standard Deviation GMV
+```{r}
+dmd_gmv_sd <- round(sd(dmd$GMV, na.rm = TRUE), 1)
+message("Standard deviation of GMV of DMD patients:", dmd_gmv_sd)
+
+hc_gmv_sd <- round(sd(hc$GMV, na.rm = TRUE), 1)
+message("Standard deviation of GMV of HC patients:", hc_gmv_sd)
+```
+
+:::
+
+------------------------------------------------------------------------
+
+## Linear Regression Analysis
 
 We perform linear regression analysis to assess the relationship between age and TBV ratio for both groups. The results are displayed in the summary output.
 
