@@ -1011,7 +1011,7 @@ summary(model.fit0)
 
 With model.fit we will fit a linear mixed-effects model to predict the TBV ratio based on the age, age squared, and group of the patients. We will then print the summary of the model to assess the model fit.
 ```{r}
-model.fit <- lmer(TBV_Ratio ~ (1 | ID) + Age + Age2 + group + (group * Age) + (group * Age2), data = all_patients)
+model.fit <- lmer(TBV_Ratio ~ (1 | ID) + Age + Age2 + group + (group * Age) + (group * Age2) + Scannertype, data = all_patients)
 summary(model.fit)
 ```
 
@@ -1051,16 +1051,55 @@ p
 # Scatterplot of TBV vs Age with color and shape by group and scanner type
 p <- ggplot(all_patients, aes(x= Age, y = TBV, color = group)) +
   geom_point(aes(shape = as.factor(Scannertype))) +
-  geom_smooth(method = "loess", se = FALSE) +
+  geom_smooth(method = "lm", se = TRUE, aes(fill = group)) +
   scale_shape_discrete(name = "Scanner Type") +  # Separate legend for shape
   scale_color_discrete(name = "Group") +         # Separate legend for color
-  labs(title = "Brain Volume vs Age", x = "Age", y = "TBV", color = "Group", shape = "Scanner Type") +
+  scale_fill_discrete(name = "Group") +          # Seperate legend for fill
+  labs(title = "Total Brain Volume vs Age", x = "Age", y = "TBV in cm³", color = "Group", shape = "Scanner Type") +
   theme_bw()
 
 p <- ggplotly(p)
 p
 ```
 
+
+### Filter data
+```{r}
+dmd <- dmd %>% filter(!is.na(Age) & !is.na(TBV) & is.finite(Age) & is.finite(TBV))
+hc <- hc %>% filter(!is.na(Age) & !is.na(TBV) & is.finite(Age) & is.finite(TBV))
+
+dmd_patients_first_visit <- dmd %>% filter(Visit == 1)
+dmd_patients_second_visit <- dmd %>% filter(Visit == 2)
+hc_patients_first_visit <- hc %>% filter(Visit == 1)
+hc_patients_second_visit <- hc %>% filter(Visit == 2)
+```
+
+
+
+### Plot of TBV vs Age paired measures for DMD and HC patients
+```{r}
+baseplot <- ggplot() +
+  geom_point(data = dmd_patients_first_visit, aes(x = Age, y = TBV, color = "DMD")) +
+  geom_point(data = dmd_patients_second_visit, aes(x = Age, y = TBV, color = "DMD"))+
+  geom_line(data = dmd, aes(x = Age, y = TBV, group = ID, color = "DMD"), linetype = "line") +
+  
+  geom_point(data = hc_patients_first_visit, aes(x = Age, y = TBV, color = "HC")) +
+  geom_point(data = hc_patients_second_visit, aes(x = Age, y = TBV, color = "HC"))+
+  geom_line(data = hc, aes(x = Age, y = TBV, group = ID, color = "HC"), linetype = "line") +
+  
+  geom_smooth(data = dmd, aes(x = Age, y = TBV, color = "DMD", fill = "DMD"), 
+              method = "lm", se = TRUE, alpha = 0.2) +
+  
+  geom_smooth(data = hc, aes(x = Age, y = TBV, color = "HC", fill = "HC"), 
+              method = "lm", se = TRUE, alpha = 0.2) +
+  
+  labs(title = "Total Brain Volume vs Age", x = "Age", y = "TBV in cm³", color = "Group") +
+  theme_bw()
+
+p <- ggplotly(baseplot)
+p
+
+```
 
 ### Scatterplot of TBV vs Age faucet by scanner type
 
@@ -1123,9 +1162,11 @@ Here we will create a scatter plot of the gray matter volume vs age for all pati
 ```{r}
 baseplot <- ggplot(all_patients, aes(x = Age, y = GMV, color = group)) +
   geom_point(aes(shape = as.factor(Scannertype))) +
-  geom_smooth(method = "lm", se = FALSE) +
+  geom_point(dmd_patients_first_visit, aes(x = Age, y = GMV, color = "DMD")) +
+  geom_smooth(method = "lm", se = TRUE, aes(fill = group)) +
   scale_shape_discrete(name = "Scanner Type") +  # Separate legend for shape
   scale_color_discrete(name = "Group") +         # Separate legend for color
+  scale_fill_discrete(name = "Group") +          # Separate legend for fill
   labs(title = "Gray Matter Volume vs Age", x = "Age", y = "GMV", color = "Group", shape = "Scanner Type") +
   theme_bw()
 
