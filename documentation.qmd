@@ -165,6 +165,10 @@ hc_kids_uk <- hc[grepl("^DMDBUK", hc$ID), ]       # UK kids
 message("DMD amount of NL adults:", nrow(dmd_adults_nl))
 message("DMD amount of NL kids:", nrow(dmd_kids_nl))
 message("DMD amount of UK kids:", nrow(dmd_kids_uk), "\n")
+
+# Age range of DMD patients
+message("Age range of DMD patients:", round(min(dmd$Age, na.rm = TRUE)), "-", round(max(dmd$Age, na.rm = TRUE)))
+
 ```
 
 ### HC
@@ -174,6 +178,9 @@ message("DMD amount of UK kids:", nrow(dmd_kids_uk), "\n")
 message("HC amount of NL adults:", nrow(hc_adults_nl))
 message("HC amount of NL kids:", nrow(hc_kids_nl))
 message("HC amount of UK kids:", nrow(hc_kids_uk), "\n")
+
+# Age range of HC patients
+message("Age range of HC patients:", round(min(hc$Age, na.rm = TRUE)), "-", round(max(hc$Age, na.rm = TRUE)))
 ```
 
 ### kids
