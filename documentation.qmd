@@ -1030,7 +1030,7 @@ Here we will perform a linear regression analysis to predict the brain volume ba
 # Scatterplot of TBV ratio vs Age
 p <- ggplot(all_patients, aes(x = Age, y = TBV, color = group)) +
   geom_point(na.rm = TRUE) +
-  labs(title = "Scatterplot of Brain Volume", x = "Age", y = "TBV", color = "Group") +
+  labs(title = "Scatterplot of Brain Volume", x = "Age", y = "TBV (cm³)", color = "Group") +
   theme(plot.title = element_text(hjust = 0.5)) +
   geom_smooth(method = "lm", se = FALSE, color = "black") +
   scale_color_manual(values = c("DMD" = "red", "HC" = "green")) +
@@ -1093,7 +1093,7 @@ baseplot <- ggplot() +
   geom_smooth(data = hc, aes(x = Age, y = TBV, color = "HC", fill = "HC"), 
               method = "lm", se = TRUE, alpha = 0.2) +
   
-  labs(title = "Total Brain Volume vs Age", x = "Age", y = "TBV in cm³", color = "Group") +
+  labs(title = "Total Brain Volume vs Age", x = "Age", y = "TBV (cm³)", color = "Group") +
   theme_bw()
 
 p <- ggplotly(baseplot)
@@ -1115,7 +1115,7 @@ p <- ggplot(all_patients, aes(x= Age, y = TBV, color = group)) +
   geom_point(aes(shape = as.factor(Scannertype))) +
   geom_smooth(method = "lm", se = FALSE) +
   facet_wrap(~ Scannertype) + 
-  labs(title = "Brain Volume vs Age", x = "Age", y = "TBV", color = "Group", shape = "Scanner Type") +
+  labs(title = "Brain Volume vs Age", x = "Age", y = "TBV (cm³)", color = "Group", shape = "Scanner Type") +
   theme_bw()
 
 p <- ggplotly(p)
@@ -1131,7 +1131,7 @@ Here we will perform a linear regression analysis to predict the brain volume ba
 ```{r}
 clean_data <- all_patients[is.finite(all_patients$Age) & is.finite(all_patients$TBV), ]
 model <- lm(TBV ~ Age, data = clean_data)
-plot(all_patients$Age, all_patients$TBV, xlab = "Age", ylab = "TBV cm^3", pch = 20, col = "grey35")
+plot(all_patients$Age, all_patients$TBV, xlab = "Age", ylab = "TBV (cm³)", pch = 20, col = "grey35")
 
 
 # GLM model to predict the brain volume based on the age and group
@@ -1177,7 +1177,7 @@ baseplot <- ggplot() +
   geom_smooth(data = hc, aes(x = Age, y = GMV, color = "HC", fill = "HC"), 
               method = "lm", se = TRUE, alpha = 0.2) +
   
-  labs(title = "Gray Matter Volume vs Age", x = "Age", y = "GMV in cm³", color = "Group") +
+  labs(title = "Gray Matter Volume vs Age", x = "Age", y = "GMV (cm³)", color = "Group") +
   theme_bw()
 
 p <- ggplotly(baseplot)
