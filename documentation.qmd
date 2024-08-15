@@ -788,15 +788,16 @@ print(t_test)
 ```
 
 
-### plot TBV Ratio
+### Plot the GMV:TBV ratio
 
 ```{r}
 baseplot <- ggplot(all_patients, aes(x = Age, y = TBV_Ratio, color = group)) +
   geom_point(aes(shape = as.factor(Scannertype))) +
-  geom_smooth(method = "lm", se = FALSE) +
+  geom_smooth(method = "lm", se = TRUE, aes(fill = group)) +
   scale_shape_discrete(name = "Scanner Type") +
   scale_color_discrete(name = "Group") +
-  labs(title = "TBV Ratio vs Age group", x = "Age", y = "TBV Ratio", color = "Group") +
+  scale_fill_discrete(name = "Group") +
+  labs(title = "Ratio of GM to Total Brain Volume", x = "Age", y = "GMV:TBV", color = "Group") +
   theme_bw()
 
 p <- ggplotly(baseplot)
