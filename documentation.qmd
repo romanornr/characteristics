@@ -1160,14 +1160,24 @@ lines(lowess(clean_data$Age, clean_data$TBV), col = "blue", lty = "longdash")
 Here we will create a scatter plot of the gray matter volume vs age for all patients. We will color the points by group to visualize the distribution of gray matter volume with respect to age.
 
 ```{r}
-baseplot <- ggplot(all_patients, aes(x = Age, y = GMV, color = group)) +
-  geom_point(aes(shape = as.factor(Scannertype))) +
-  geom_point(dmd_patients_first_visit, aes(x = Age, y = GMV, color = "DMD")) +
-  geom_smooth(method = "lm", se = TRUE, aes(fill = group)) +
-  scale_shape_discrete(name = "Scanner Type") +  # Separate legend for shape
-  scale_color_discrete(name = "Group") +         # Separate legend for color
-  scale_fill_discrete(name = "Group") +          # Separate legend for fill
-  labs(title = "Gray Matter Volume vs Age", x = "Age", y = "GMV", color = "Group", shape = "Scanner Type") +
+# Scatterplot of GMV vs Age
+baseplot <- ggplot() +
+  
+  geom_point(data = dmd_patients_first_visit, aes(x = Age, y = GMV, color = "DMD", shape = as.factor(Scannertype))) +
+  geom_point(data = dmd_patients_second_visit, aes(x = Age, y = GMV, color = "DMD", shape = as.factor(Scannertype)))+
+  geom_line(data = dmd, aes(x = Age, y = GMV, group = ID, color = "DMD"), linetype = "line") +
+  
+  geom_point(data = hc_patients_first_visit, aes(x = Age, y = GMV, color = "HC", shape = as.factor(Scannertype))) +
+  geom_point(data = hc_patients_second_visit, aes(x = Age, y = GMV, color = "HC", shape = as.factor(Scannertype)))+
+  geom_line(data = hc, aes(x = Age, y = GMV, group = ID, color = "HC"), linetype = "line") +
+  
+  geom_smooth(data = dmd, aes(x = Age, y = GMV, color = "DMD", fill = "DMD"), 
+              method = "lm", se = TRUE, alpha = 0.2) +
+  
+  geom_smooth(data = hc, aes(x = Age, y = GMV, color = "HC", fill = "HC"), 
+              method = "lm", se = TRUE, alpha = 0.2) +
+  
+  labs(title = "Gray Matter Volume vs Age", x = "Age", y = "GMV in cm³", color = "Group") +
   theme_bw()
 
 p <- ggplotly(baseplot)
