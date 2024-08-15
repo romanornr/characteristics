@@ -9,6 +9,19 @@ toc: true
 
 This document outlines the steps taken to analyze a dataset containing information about Muscle Dystrophy (DMD) patients and Healthy Controls (HC)
 
+
+:::callout
+all_patients dataset is a combination of DMD and HC patients !
+:::
+
+:::callout
+TBV_ratio = GMV:TBV
+:::
+
+:::callout
+ScannerType is study
+:::
+
 ------------------------------------------------------------------------
 
 ### import data & libraries
