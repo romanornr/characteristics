@@ -83,7 +83,8 @@ rules <- list(
   Age = c(9999),
   TBV = c(9999),
   TBV_Ratio = c(9999),
-  Mutation = c(9999)
+  Mutation = c(9999),
+  GMV = c(9999)
 )
 ```
 
