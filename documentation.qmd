@@ -916,26 +916,39 @@ p_faceted <- ggplotly(p_faceted)
 p_faceted
 ```
 
+
 ### Repeated Measures
 ```{r}
 # Scatter plot of GMV and TBV ratio with repeated measures
-baseplot <- ggplot() +
-  geom_point(data = dmd_patients_first_visit, aes(x = Age, y = GMV, color = "DMD")) +
-  geom_point(data = dmd_patients_second_visit, aes(x = Age, y = GMV, color = "DMD")) +
-  geom_line(data = dmd, aes(x = Age, y = TBV, group = ID, color = "DMD"), linetype = "line") +
+baseplot_repeated_measures <- ggplot(all_patients, aes(x = Age, y = GMV, color = group)) +
   
-  geom_point(data = hc_patients_first_visit, aes(x = Age, y = GMV, color = "HC")) +
-  geom_point(data = hc_patients_second_visit, aes(x = Age, y = GMV, color = "HC")) +
-  geom_line(data = hc, aes(x = Age, y = TBV, group = ID, color = "HC"), linetype = "line") +
+  geom_point(data = dmd_patients_first_visit %>% filter(!is.na(Age) & is.finite(Age)), 
+             aes(x = Age, y = GMV, color = "DMD")) +
+  geom_point(data = dmd_patients_second_visit %>% filter(!is.na(Age) & is.finite(Age)), 
+             aes(x = Age, y = GMV, color = "DMD")) +
+  geom_line(data = dmd %>% filter(!is.na(Age) & !is.na(GMV) & is.finite(Age) & is.finite(GMV)), 
+            aes(x = Age, y = GMV, group = ID, color = "DMD"), linetype = "solid") +
   
-  geom_smooth(data = dmd, aes(x = Age, y = GMV, color = "DMD"), method = "lm", se = FALSE) +
-  geom_smooth(data = hc, aes(x = Age, y = GMV, color = "HC"), method = "lm", se = FALSE) +
+  geom_point(data = hc_patients_first_visit %>% filter(!is.na(Age) & is.finite(Age)), 
+             aes(x = Age, y = GMV, color = "HC")) +
+  geom_point(data = hc_patients_second_visit %>% filter(!is.na(Age) & is.finite(Age)), 
+             aes(x = Age, y = GMV, color = "HC")) +
+  geom_line(data = hc %>% filter(!is.na(Age) & !is.na(GMV) & is.finite(Age) & is.finite(GMV)), 
+            aes(x = Age, y = GMV, group = ID, color = "HC"), linetype = "solid") +
   
-  labs(title = "GMV vs TBV Ratio with Repeated Measures", x = "Age", y = "GMV:TBV", color = "Group") +
+  geom_smooth(method = "lm", se = TRUE, aes(fill = group)) +
+  
+  scale_color_discrete(name = "Group") +
+  scale_fill_discrete(name = "Group") +
+  
+  labs(title = "GMV over Age with Repeated Measures", x = "Age", y = "GMV", color = "Group") +
   theme_bw()
 
-p <- ggplotly(baseplot)
+p <- ggplotly(baseplot_repeated_measures)
+p
+```
 
+```{r}
 ```
 
 
