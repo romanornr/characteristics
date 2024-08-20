@@ -95,7 +95,6 @@ rules <- list(
 We'll create subsets of our dataset based on the Disease column to separate DMD (patients with disease) and HC (healthy control patients). We also handle the missing values with the `replace_values_with_na_mutate` function based on our defined rules.
 
 ```{r}
-
 dmd <- dataset[dataset$Disease == 1, ]
 hc <- dataset[dataset$Disease == 0, ]
 
@@ -103,9 +102,14 @@ dmd <- replace_values_with_na_mutate(dmd, rules)
 hc <- replace_values_with_na_mutate(hc, rules)
 ```
 
+### Filter out missing values
+```{r}
+dmd <- dmd %>% filter(!is.na(Age) & !is.na(TBV) & is.finite(Age) & is.finite(TBV))
+hc <- hc %>% filter(!is.na(Age) & !is.na(TBV) & is.finite(Age) & is.finite(TBV))
+```
+
 
 ### Combine DMD and HC datasets
-
 
 Here we combine the DMD and HC datasets to perform inferential statistics on the TBV ratio between the two groups.
 With the is.finite function, we filter out any missing values in the Age and TBV columns. We then create a new column `group` to identify the patients as either DMD or HC.
@@ -116,6 +120,16 @@ all_patients <- rbind(dmd, hc)
 all_patients <- all_patients %>%
   mutate(group = ifelse(Disease == 1, "DMD", "HC")) %>%
   filter(is.finite(Age), is.finite(TBV))
+```
+
+
+### Separate DMD and HC patients by visit number for repeated measures analysis
+
+```{r}
+dmd_patients_first_visit <- dmd %>% filter(Visit == 1)
+dmd_patients_second_visit <- dmd %>% filter(Visit == 2)
+hc_patients_first_visit <- hc %>% filter(Visit == 1)
+hc_patients_second_visit <- hc %>% filter(Visit == 2)
 ```
 
 
@@ -866,7 +880,9 @@ print(t_test)
 ```
 
 
-### Plot the GMV:TBV ratio
+## Plot the GMV:TBV ratio
+
+We will plot the GMV:TBV ratio for all patients to visualize the relationship between age and the GMV:TBV ratio.
 
 ```{r}
 baseplot <- ggplot(all_patients, aes(x = Age, y = TBV_Ratio, color = group)) +
@@ -875,19 +891,42 @@ baseplot <- ggplot(all_patients, aes(x = Age, y = TBV_Ratio, color = group)) +
   scale_shape_discrete(name = "Scanner Type") +
   scale_color_discrete(name = "Group") +
   scale_fill_discrete(name = "Group") +
-  labs(title = "Ratio of GM to Total Brain Volume", x = "Age", y = "GMV:TBV", color = "Group") +
+  labs(title = "Ratio of GMV to Total Brain Volume", x = "Age", y = "GMV:TBV", color = "Group") +
   theme_bw()
 
 p <- ggplotly(baseplot)
 p
 ```
 
-
+### Faceted Plot
 ```{r}
 p_faceted <- baseplot + facet_wrap(~ Scannertype)
 p_faceted <- ggplotly(p_faceted)
 p_faceted
 ```
+
+### Repeated Measures
+```{r}
+# Scatter plot of GMV and TBV ratio with repeated measures
+baseplot <- ggplot() +
+  geom_point(data = dmd_patients_first_visit, aes(x = Age, y = GMV, color = "DMD")) +
+  geom_point(data = dmd_patients_second_visit, aes(x = Age, y = GMV, color = "DMD")) +
+  geom_line(data = dmd, aes(x = Age, y = TBV, group = ID, color = "DMD"), linetype = "line") +
+  
+  geom_point(data = hc_patients_first_visit, aes(x = Age, y = GMV, color = "HC")) +
+  geom_point(data = hc_patients_second_visit, aes(x = Age, y = GMV, color = "HC")) +
+  geom_line(data = hc, aes(x = Age, y = TBV, group = ID, color = "HC"), linetype = "line") +
+  
+  geom_smooth(data = dmd, aes(x = Age, y = GMV, color = "DMD"), method = "lm", se = FALSE) +
+  geom_smooth(data = hc, aes(x = Age, y = GMV, color = "HC"), method = "lm", se = FALSE) +
+  
+  labs(title = "GMV vs TBV Ratio with Repeated Measures", x = "Age", y = "GMV:TBV", color = "Group") +
+  theme_bw()
+
+p <- ggplotly(baseplot)
+
+```
+
 
 
 ------------------------------------------------------------------------
@@ -1142,19 +1181,6 @@ p
 ```
 
 
-### Filter data
-```{r}
-dmd <- dmd %>% filter(!is.na(Age) & !is.na(TBV) & is.finite(Age) & is.finite(TBV))
-hc <- hc %>% filter(!is.na(Age) & !is.na(TBV) & is.finite(Age) & is.finite(TBV))
-
-dmd_patients_first_visit <- dmd %>% filter(Visit == 1)
-dmd_patients_second_visit <- dmd %>% filter(Visit == 2)
-hc_patients_first_visit <- hc %>% filter(Visit == 1)
-hc_patients_second_visit <- hc %>% filter(Visit == 2)
-```
-
-
-
 ### Plot of TBV vs Age paired measures for DMD and HC patients
 ```{r}
 baseplot <- ggplot() +
@@ -1179,6 +1205,8 @@ p <- ggplotly(baseplot)
 p
 
 ```
+
+
 
 ### Scatterplot of TBV vs Age faucet by scanner type
 
