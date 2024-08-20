@@ -919,40 +919,87 @@ p_faceted
 
 ### Repeated Measures
 ```{r}
-# Scatter plot of GMV and TBV ratio with repeated measures
-baseplot_repeated_measures <- ggplot(all_patients, aes(x = Age, y = GMV, color = group)) +
+# Scatter plot of GMV:TBV ratio with repeated measures
+baseplot_repeated_measures <- ggplot(all_patients, aes(x = Age, y = TBV_Ratio, color = group)) +
   
-  geom_point(data = dmd_patients_first_visit %>% filter(!is.na(Age) & is.finite(Age)), 
-             aes(x = Age, y = GMV, color = "DMD")) +
-  geom_point(data = dmd_patients_second_visit %>% filter(!is.na(Age) & is.finite(Age)), 
-             aes(x = Age, y = GMV, color = "DMD")) +
-  geom_line(data = dmd %>% filter(!is.na(Age) & !is.na(GMV) & is.finite(Age) & is.finite(GMV)), 
-            aes(x = Age, y = GMV, group = ID, color = "DMD"), linetype = "solid") +
+  geom_point(data = dmd_patients_first_visit %>% filter(!is.na(Age) & is.finite(Age) & !is.na(TBV_Ratio) & is.finite(TBV_Ratio)), 
+             aes(x = Age, y = TBV_Ratio, color = "DMD")) +
   
-  geom_point(data = hc_patients_first_visit %>% filter(!is.na(Age) & is.finite(Age)), 
-             aes(x = Age, y = GMV, color = "HC")) +
-  geom_point(data = hc_patients_second_visit %>% filter(!is.na(Age) & is.finite(Age)), 
-             aes(x = Age, y = GMV, color = "HC")) +
-  geom_line(data = hc %>% filter(!is.na(Age) & !is.na(GMV) & is.finite(Age) & is.finite(GMV)), 
-            aes(x = Age, y = GMV, group = ID, color = "HC"), linetype = "solid") +
+  geom_point(data = dmd_patients_second_visit %>% filter(!is.na(Age) & is.finite(Age) & !is.na(TBV_Ratio) & is.finite(TBV_Ratio)), 
+             aes(x = Age, y = TBV_Ratio, color = "DMD")) +
+  
+  geom_line(data = dmd %>% filter(!is.na(Age) & !is.na(TBV_Ratio) & is.finite(Age) & is.finite(TBV_Ratio)), 
+            aes(x = Age, y = TBV_Ratio, group = ID, color = "DMD"), linetype = "solid") +
+  
+  geom_point(data = hc_patients_first_visit %>% filter(!is.na(Age) & is.finite(Age) & !is.na(TBV_Ratio) & is.finite(TBV_Ratio)), 
+             aes(x = Age, y = TBV_Ratio, color = "HC")) +
+  
+  geom_point(data = hc_patients_second_visit %>% filter(!is.na(Age) & is.finite(Age) & !is.na(TBV_Ratio) & is.finite(TBV_Ratio)), 
+             aes(x = Age, y = TBV_Ratio, color = "HC")) +
+  
+  geom_line(data = hc %>% filter(!is.na(Age) & !is.na(TBV_Ratio) & is.finite(Age) & is.finite(TBV_Ratio)), 
+            aes(x = Age, y = TBV_Ratio, group = ID, color = "HC"), linetype = "solid") +
   
   geom_smooth(method = "lm", se = TRUE, aes(fill = group)) +
   
   scale_color_discrete(name = "Group") +
   scale_fill_discrete(name = "Group") +
   
-  labs(title = "GMV over Age with Repeated Measures", x = "Age", y = "GMV", color = "Group") +
+  labs(title = "GMV vs Age with Repeated Measures", x = "Age", y = "GMV:TBV", color = "Group") +
   theme_bw()
 
 p <- ggplotly(baseplot_repeated_measures)
 p
 ```
 
+
+### Repeated Measures with Scannertype
+Here we plot to visualize the relationship between age and the GMV:TBV ratio with repeated measures and Scannertype as the facet variable.
+
 ```{r}
+gmv_ratio_repeated_measures_scannertype <- ggplot(all_patients, aes(x = Age, y = TBV_Ratio, color = group)) +
+  
+  geom_point(data = dmd_patients_first_visit %>% filter(!is.na(Age) & is.finite(Age) & !is.na(TBV_Ratio) & is.finite(TBV_Ratio)), 
+             aes(x = Age, y = TBV_Ratio, color = "DMD", shape = as.factor(Scannertype))) +
+  
+  geom_point(data = dmd_patients_second_visit %>% filter(!is.na(Age) & is.finite(Age) & !is.na(TBV_Ratio) & is.finite(TBV_Ratio)), 
+             aes(x = Age, y = TBV_Ratio, color = "DMD", shape = as.factor(Scannertype))) +
+  
+  geom_line(data = dmd %>% filter(!is.na(Age) & !is.na(TBV_Ratio) & is.finite(Age) & is.finite(TBV_Ratio)), 
+            aes(x = Age, y = TBV_Ratio, group = ID, color = "DMD"), linetype = "solid") +
+  
+  geom_point(data = hc_patients_first_visit %>% filter(!is.na(Age) & is.finite(Age) & !is.na(TBV_Ratio) & is.finite(TBV_Ratio)), 
+             aes(x = Age, y = TBV_Ratio, color = "HC", shape = as.factor(Scannertype))) +
+  
+  geom_point(data = hc_patients_second_visit %>% filter(!is.na(Age) & is.finite(Age) & !is.na(TBV_Ratio) & is.finite(TBV_Ratio)), 
+             aes(x = Age, y = TBV_Ratio, color = "HC", shape = as.factor(Scannertype))) +
+  
+  geom_line(data = hc %>% filter(!is.na(Age) & !is.na(TBV_Ratio) & is.finite(Age) & is.finite(TBV_Ratio)), 
+            aes(x = Age, y = TBV_Ratio, group = ID, color = "HC"), linetype = "solid") +
+  
+  geom_smooth(method = "lm", se = TRUE, aes(fill = group)) +
+  
+  scale_color_discrete(name = "Group") +
+  scale_fill_discrete(name = "Group") +
+  scale_shape_discrete(name = "Scanner Type") +  # Add a legend for shape
+  labs(title = "GMV vs Age with Repeated Measures", x = "Age", y = "GMV:TBV", color = "Group") +
+  theme_bw()
+
+p <- ggplotly(gmv_ratio_repeated_measures_scannertype)
+p
 ```
 
 
+### Faceted Repeated Measures with Scannertype facet
 
+Here we create a faceted plot with repeated measures for GMV with the Scannertype as the facet variable.
+
+```{r}
+p_faceted_repeated_measures <- gmv_ratio_repeated_measures_scannertype + facet_wrap(~ Scannertype)
+p_faceted_repeated_measures <- gmv_ratio_repeated_measures_scannertype + labs(title = "GMV vs age with repeated mesures and Scannertype", x = "Age", y = "GMV:TBV", color = "Group")
+p <- ggplotly(p_faceted_repeated_measures)
+p
+```
 ------------------------------------------------------------------------
 
 ## Mutation Group analysis 
@@ -1335,5 +1382,48 @@ p
 p_facet <- baseplot + facet_wrap(~ Scannertype)  # Facet by the 'group' variable
 p_facet <- ggplotly(p_facet)
 p_facet
+```
+
+
+### Repeated Measures
+```{r}
+# Scatter plot of GMV and TBV ratio with repeated measures
+baseplot_repeated_measures <- ggplot(all_patients, aes(x = Age, y = GMV, color = group)) +
+  
+  geom_point(data = dmd_patients_first_visit %>% filter(!is.na(Age) & is.finite(Age)), 
+             aes(x = Age, y = GMV, color = "DMD")) +
+  geom_point(data = dmd_patients_second_visit %>% filter(!is.na(Age) & is.finite(Age)), 
+             aes(x = Age, y = GMV, color = "DMD")) +
+  geom_line(data = dmd %>% filter(!is.na(Age) & !is.na(GMV) & is.finite(Age) & is.finite(GMV)), 
+            aes(x = Age, y = GMV, group = ID, color = "DMD"), linetype = "solid") +
+  
+  geom_point(data = hc_patients_first_visit %>% filter(!is.na(Age) & is.finite(Age)), 
+             aes(x = Age, y = GMV, color = "HC")) +
+  geom_point(data = hc_patients_second_visit %>% filter(!is.na(Age) & is.finite(Age)), 
+             aes(x = Age, y = GMV, color = "HC")) +
+  geom_line(data = hc %>% filter(!is.na(Age) & !is.na(GMV) & is.finite(Age) & is.finite(GMV)), 
+            aes(x = Age, y = GMV, group = ID, color = "HC"), linetype = "solid") +
+  
+  geom_smooth(method = "lm", se = TRUE, aes(fill = group)) +
+  
+  scale_color_discrete(name = "Group") +
+  scale_fill_discrete(name = "Group") +
+  
+  labs(title = "GMV over Age with Repeated Measures", x = "Age", y = "GMV", color = "Group") +
+  theme_bw()
+
+p <- ggplotly(baseplot_repeated_measures)
+p
+```
+
+
+### Faceted Repeated Measures with Scannertype
+
+Here we create a faceted plot with repeated measures for GMV with the Scannertype as the facet variable.
+
+```{r}
+p_faceted_repeated_measures <- baseplot_repeated_measures + facet_wrap(~ Scannertype)
+p_faceted_repeated_measures <- ggplotly(p_faceted_repeated_measures)
+p_faceted_repeated_measures
 ```
 
