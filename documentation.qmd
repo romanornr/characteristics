@@ -398,20 +398,22 @@ We want to categorize patients into different age groups based on the visit numb
 # categorize_age function to categorize patients into different age groups
 categorize_age <- function(age) {
   case_when(
+    is.na(age) ~ NA_character_, # Explicitly handle NA values
     age <= 5 ~ "0 - 5 years old",
     age <= 12 ~ "6 - 12 years old",
     age <= 19 ~ "13 - 19 years old",
     age <= 25 ~ "20 - 25 years old",
-    TRUE ~ "26+ years old"
+    age >= 26 ~ "26+ years old",
+    TRUE ~ NA_character_
   )
 }
-
 ```
 
 
 ::: callout-note
 Age Groups: Defined as "0 - 5 years old," "6 - 12 years old," "13 - 19 years old," "20 - 25 years old," and "26+ years old."
 :::
+
 
 Here we define a function to display the number of patients in each age group and the percentage of patients in each group.
 ```{r}
@@ -439,7 +441,9 @@ Percentage calculation: `(100 / total number of patients) * number of patients i
 ### DMD 1st visit
 
 ```{r}
-dmd_first_visit <- dmd %>% filter(Visit == 1)
+# dmd_first_visit dataset contains the first visit data of DMD patients with valid age values
+dmd_first_visit <- dmd %>%
+  filter(Visit == 1 & !is.na(Age) & is.finite(Age))
 display_age_groups(dmd_first_visit, "DMD first visit")
 
 ```
@@ -447,33 +451,44 @@ display_age_groups(dmd_first_visit, "DMD first visit")
 ### DMD 2nd visit
 
 ```{r}
-dmd_second_visit <- dmd %>% filter(Visit == 2)
+# dmd_second_visit dataset contains the second visit data of DMD patients with valid age values
+dmd_second_visit <- dmd %>%
+  filter(Visit == 2 & !is.na(Age) & is.finite(Age))
 display_age_groups(dmd_second_visit, "DMD second visit")
 ```
 
 ### HC 1st visit
 ```{r}
-hc_first_visit <- hc %>% filter(Visit == 1)
+# hc_first_visit dataset contains the first visit data of HC patients with valid age values
+hc_first_visit <- hc %>%
+  filter(Visit == 1 & !is.na(Age) & is.finite(Age))
 display_age_groups(hc_first_visit, "HC first visit")
 ```
 
 ### HC 2nd visit
 ```{r}
-hc_second_visit <- hc %>% filter(Visit == 2)
+# hc_second_visit dataset contains the second visit data of HC patients with valid age values
+hc_second_visit <- hc %>%
+  filter(Visit == 2 & !is.na(Age) & is.finite(Age))
 display_age_groups(hc_second_visit, "HC second visit")
 ```
 
 ### DMD combined
 ```{r}
-dmd_combined <- dmd %>% filter(Visit == 1 | Visit == 2)
+# dmd_combined dataset contains the combined data of DMD patients with valid age values
+dmd_combined <- dmd %>%
+  filter(Visit == 1 | Visit == 2 & !is.na(Age) & is.finite(Age))
 display_age_groups(dmd_combined, "DMD combined")
 ```
 
 ### HC combined
 ```{r}
-hc_combined <- hc %>% filter(Visit == 1 | Visit == 2)
+# hc_combined dataset contains the combined data of HC patients with valid age values
+hc_combined <- hc %>%
+  filter(Visit == 1 | Visit == 2 & !is.na(Age) & is.finite(Age))
 display_age_groups(hc_combined, "HC combined")
 ```
+
 :::
 
 ------------------------------------------------------------------------
