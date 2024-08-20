@@ -102,11 +102,6 @@ dmd <- replace_values_with_na_mutate(dmd, rules)
 hc <- replace_values_with_na_mutate(hc, rules)
 ```
 
-### Filter out missing values
-```{r}
-dmd <- dmd %>% filter(!is.na(Age) & !is.na(TBV) & is.finite(Age) & is.finite(TBV))
-hc <- hc %>% filter(!is.na(Age) & !is.na(TBV) & is.finite(Age) & is.finite(TBV))
-```
 
 
 ### Combine DMD and HC datasets
@@ -1158,6 +1153,19 @@ p <- ggplot(all_patients, aes(x = Age, y = TBV, color = group)) +
 p <- ggplotly(p)
 p
 ```
+
+
+## Data cleaning
+To ensure the data is clean and ready for analysis because missing or non-finite values can lead to misleading results or errors in subsequent analyses and visualizations.
+The following code filters out rows where either `Age` or `TBV` is missing (`NA`) or non-finite (e.g., `Inf`, `-Inf`, `NaN`). The cleaned data will be used for further analysis and plotting.
+
+```{r}
+# Filter out rows with missing or non-finite values in Age and TBV columns
+dmd <- dmd %>% filter(!is.na(Age) & !is.na(TBV) & is.finite(Age) & is.finite(TBV))
+hc <- hc %>% filter(!is.na(Age) & !is.na(TBV) & is.finite(Age) & is.finite(TBV))
+```
+
+
 
 
 ## Total brain volume vs age
