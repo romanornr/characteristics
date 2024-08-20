@@ -397,6 +397,7 @@ We want to categorize patients into different age groups based on the visit numb
 ```{r}
 # categorize_age function to categorize patients into different age groups
 categorize_age <- function(age) {
+  age <- round(age) # Round the age to the nearest whole number
   case_when(
     is.na(age) ~ NA_character_, # Explicitly handle NA values
     age <= 5 ~ "0 - 5 years old",
