@@ -1389,6 +1389,35 @@ p
 ```
 
 
+```{r}
+# Updated baseplot with LOESS smoothing lines for each group
+baseplot <- ggplot() +
+  geom_point(data = dmd_patients_first_visit, aes(x = Age, y = TBV, color = "DMD")) +
+  geom_point(data = dmd_patients_second_visit, aes(x = Age, y = TBV, color = "DMD")) +
+  geom_line(data = dmd, aes(x = Age, y = TBV, group = ID, color = "DMD"), linetype = "line") +
+  
+  geom_point(data = hc_patients_first_visit, aes(x = Age, y = TBV, color = "HC")) +
+  geom_point(data = hc_patients_second_visit, aes(x = Age, y = TBV, color = "HC")) +
+  geom_line(data = hc, aes(x = Age, y = TBV, group = ID, color = "HC"), linetype = "line") +
+  
+  # LOESS smoothing line for DMD group
+  geom_smooth(data = dmd, aes(x = Age, y = TBV, color = "DMD", fill = "DMD"), 
+              method = "loess", se = TRUE, alpha = 0.2) +
+  
+  # LOESS smoothing line for HC group
+  geom_smooth(data = hc, aes(x = Age, y = TBV, color = "HC", fill = "HC"), 
+              method = "loess", se = TRUE, alpha = 0.2) +
+  
+  labs(title = "Total Brain Volume vs Age", x = "Age", y = "TBV (cm³)", color = "Group") +
+  theme_bw()
+
+# Convert the ggplot to an interactive plotly plot
+p <- ggplotly(baseplot)
+p
+
+```
+
+
 
 ### Scatterplot of TBV vs Age faucet by scanner type
 
