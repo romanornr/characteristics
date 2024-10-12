@@ -940,6 +940,11 @@ p_faceted
 
 
 ### Repeated Measures
+
+We plot the relationship between age and Total Brain Volume (`TBV`) ratio for Duchenne Muscular Dystrophy (`DMD`) patients and Healthy Controls (`HC`). This includes scatter plots of TBV ratio versus age for both groups, with points representing measurements from the first and second visits of each patient.
+
+Additionally, we connect these points with solid lines to show repeated measures for each individual over time. We also include linear regression lines with confidence intervals for both groups to illustrate the general trends in TBV ratio as age progresses.
+
 ```{r}
 # Scatter plot of GMV:TBV ratio with repeated measures
 baseplot_repeated_measures <- ggplot(all_patients, aes(x = Age, y = TBV_Ratio, color = group)) +
@@ -967,12 +972,63 @@ baseplot_repeated_measures <- ggplot(all_patients, aes(x = Age, y = TBV_Ratio, c
   scale_color_discrete(name = "Group") +
   scale_fill_discrete(name = "Group") +
   
-  labs(title = "GMV vs Age with Repeated Measures", x = "Age", y = "GMV:TBV", color = "Group") +
+  labs(title = "TBV Ratio vs Age with Repeated Measures", x = "Age", y = "TBV Ratio", color = "Group") +
   theme_bw()
 
 p <- ggplotly(baseplot_repeated_measures)
 p
 ```
+
+
+### Repeated Measures with LOESS Smoothing
+
+Here instead of Linear we use LOESS (Locally Estimated Scatterplot Smoothing) lines for each group, to better understand the non-linear trends in TBV ratio as age progresses. This gives a more clearer picture of the dynamics in brain volume changes for each group over time.
+
+```{r}
+# Updated baseplot with LOESS smoothing lines for each group
+baseplot_repeated_measures <- ggplot(all_patients, aes(x = Age, y = TBV_Ratio, color = group)) +
+  
+  # DMD Group - Points and Lines
+  geom_point(data = dmd_patients_first_visit %>% filter(!is.na(Age) & is.finite(Age) & !is.na(TBV_Ratio) & is.finite(TBV_Ratio)), 
+             aes(x = Age, y = TBV_Ratio, color = "DMD")) +
+  
+  geom_point(data = dmd_patients_second_visit %>% filter(!is.na(Age) & is.finite(Age) & !is.na(TBV_Ratio) & is.finite(TBV_Ratio)), 
+             aes(x = Age, y = TBV_Ratio, color = "DMD")) +
+  
+  geom_line(data = dmd %>% filter(!is.na(Age) & !is.na(TBV_Ratio) & is.finite(Age) & is.finite(TBV_Ratio)), 
+            aes(x = Age, y = TBV_Ratio, group = ID, color = "DMD"), linetype = "solid") +
+  
+  # HC Group - Points and Lines
+  geom_point(data = hc_patients_first_visit %>% filter(!is.na(Age) & is.finite(Age) & !is.na(TBV_Ratio) & is.finite(TBV_Ratio)), 
+             aes(x = Age, y = TBV_Ratio, color = "HC")) +
+  
+  geom_point(data = hc_patients_second_visit %>% filter(!is.na(Age) & is.finite(Age) & !is.na(TBV_Ratio) & is.finite(TBV_Ratio)), 
+             aes(x = Age, y = TBV_Ratio, color = "HC")) +
+  
+  geom_line(data = hc %>% filter(!is.na(Age) & !is.na(TBV_Ratio) & is.finite(Age) & is.finite(TBV_Ratio)), 
+            aes(x = Age, y = TBV_Ratio, group = ID, color = "HC"), linetype = "solid") +
+  
+  # LOESS Smoothing Lines
+  geom_smooth(data = dmd %>% filter(!is.na(Age) & !is.na(TBV_Ratio) & is.finite(Age) & is.finite(TBV_Ratio)), 
+              aes(x = Age, y = TBV_Ratio, color = "DMD", fill = "DMD"), 
+              method = "loess", se = TRUE, alpha = 0.2) +
+  
+  geom_smooth(data = hc %>% filter(!is.na(Age) & !is.na(TBV_Ratio) & is.finite(Age) & is.finite(TBV_Ratio)), 
+              aes(x = Age, y = TBV_Ratio, color = "HC", fill = "HC"), 
+              method = "loess", se = TRUE, alpha = 0.2) +
+  
+  # Aesthetics
+  scale_color_discrete(name = "Group") +
+  scale_fill_discrete(name = "Group") +
+  
+  labs(title = "TBV Ratio vs Age with Repeated Measures", x = "Age", y = "TBV Ratio", color = "Group") +
+  theme_bw()
+
+# Convert the ggplot to an interactive plotly plot
+p <- ggplotly(baseplot_repeated_measures)
+p
+```
+
 
 
 ### Repeated Measures with Scannertype
@@ -1364,6 +1420,9 @@ p
 
 
 ### Plot of TBV vs Age paired measures for DMD and HC patients
+
+Here we are visualizing the relationship between age and Total Brain Volume `TBV` for two groups: Duchenne Muscular Dystrophy `DMD` patients and Healthy Controls `HC`. By plotting data points from first and second visits, as well as connecting them with lines for each individual, to capture the changes in `TBV` over time. 
+
 ```{r}
 baseplot <- ggplot() +
   geom_point(data = dmd_patients_first_visit, aes(x = Age, y = TBV, color = "DMD")) +
@@ -1388,6 +1447,8 @@ p
 
 ```
 
+
+Additionally, we add LOESS (Locally Estimated Scatterplot Smoothing) lines for each group, providing a clearer representation of the overall trend in TBV as age progresses. This helps us better understand the dynamics of brain volume changes within each group.
 
 ```{r}
 # Updated baseplot with LOESS smoothing lines for each group
@@ -1477,6 +1538,8 @@ lines(lowess(clean_data$Age, clean_data$TBV), col = "blue", lty = "longdash")
 
 Here we will create a scatter plot of the gray matter volume vs age for all patients. We will color the points by group to visualize the distribution of gray matter volume with respect to age.
 
+We are visualizing the relationship between age and Gray Matter Volume (`GMV`) for two groups: Duchenne Muscular Dystrophy (`DMD`) patients and Healthy Controls (`HC`). By plotting data points from the first and second visits, and connecting them with lines for each individual, to illustrate changes in GMV over time
+
 ```{r}
 # Scatterplot of GMV vs Age
 baseplot <- ggplot() +
@@ -1501,6 +1564,43 @@ baseplot <- ggplot() +
 p <- ggplotly(baseplot)
 p
 ```
+
+
+### Plot of Gray Matter Volume vs Age (LOESS Smoothing)
+
+Here we add LOESS (Locally Estimated Scatterplot Smoothing) lines for each group to better understand non-linear trends in GMV as age progresses. This gives a view of how GMV changes over time, while accounting for individual variability.
+```{r}
+
+# Updated baseplot with LOESS smoothing lines for each group
+baseplot <- ggplot() +
+  
+  # Points for DMD group
+  geom_point(data = dmd_patients_first_visit, aes(x = Age, y = GMV, color = "DMD", shape = as.factor(Scannertype))) +
+  geom_point(data = dmd_patients_second_visit, aes(x = Age, y = GMV, color = "DMD", shape = as.factor(Scannertype))) +
+  geom_line(data = dmd, aes(x = Age, y = GMV, group = ID, color = "DMD"), linetype = "line") +
+  
+  # Points for HC group
+  geom_point(data = hc_patients_first_visit, aes(x = Age, y = GMV, color = "HC", shape = as.factor(Scannertype))) +
+  geom_point(data = hc_patients_second_visit, aes(x = Age, y = GMV, color = "HC", shape = as.factor(Scannertype))) +
+  geom_line(data = hc, aes(x = Age, y = GMV, group = ID, color = "HC"), linetype = "line") +
+  
+  # LOESS smoothing line for DMD group
+  geom_smooth(data = dmd, aes(x = Age, y = GMV, color = "DMD", fill = "DMD"), 
+              method = "loess", se = TRUE, alpha = 0.2) +
+  
+  # LOESS smoothing line for HC group
+  geom_smooth(data = hc, aes(x = Age, y = GMV, color = "HC", fill = "HC"), 
+              method = "loess", se = TRUE, alpha = 0.2) +
+  
+  labs(title = "Gray Matter Volume vs Age", x = "Age", y = "GMV (cm³)", color = "Group") +
+  theme_bw()
+
+# Convert the ggplot to an interactive plotly plot
+p <- ggplotly(baseplot)
+p
+```
+
+
 
 ### Scatterplot of GMV vs Age faucet by scanner type
 
