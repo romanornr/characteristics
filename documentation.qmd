@@ -700,7 +700,7 @@ These scatter plots visualize the relationship between age and TBV ratio, and th
 ::: {.panel-tabset .nav-pills}
 #### Scatter Plots
 
-We create scatter plots to visualize the relationship between age and TBV ratio for both DMD and HC groups.
+We are visualizing the relationship between age and Total Brain Volume `TBV` ratio for two groups: Duchenne Muscular Dystrophy `DMD` patients and Healthy Controls `HC`. By creating scatter plots for each group, we aim to identify patterns or trends in the data. 
 
 ```{r}
 # Scatter plots
@@ -708,6 +708,28 @@ par(mfrow = c(1, 2))
 plot(dmd$Age, dmd$TBV_Ratio, main = "Scatter Age and TBV ratio of DMD", col = "red")
 plot(hc$Age, hc$TBV_Ratio, main = "Scatter Age and TBV ratio of HC", col = "green")
 ```
+
+
+To improve the visualization, we add LOESS (Locally Estimated Scatterplot Smoothing) lines, which helps to observe the general trend in the data while smoothing out fluctuations. This approach provides a clearer understanding of the age-TBV relationship within each group.
+
+```{r}
+# Scatter plots with LOESS lines
+par(mfrow = c(1, 2))
+
+# DMD Group
+plot(dmd$Age, dmd$TBV_Ratio, main = "Scatter Age and TBV ratio of DMD", col = "red")
+lines(lowess(dmd$Age[is.finite(dmd$Age) & is.finite(dmd$TBV_Ratio)], 
+             dmd$TBV_Ratio[is.finite(dmd$Age) & is.finite(dmd$TBV_Ratio)]), 
+      col = "red", lwd = 2)
+
+# HC Group
+plot(hc$Age, hc$TBV_Ratio, main = "Scatter Age and TBV ratio of HC", col = "green")
+lines(lowess(hc$Age[is.finite(hc$Age) & is.finite(hc$TBV_Ratio)], 
+             hc$TBV_Ratio[is.finite(hc$Age) & is.finite(hc$TBV_Ratio)]), 
+      col = "green", lwd = 2)
+
+```
+
 
 #### Correlation
 
@@ -1264,8 +1286,11 @@ print(anova_results3)
 These ANOVA tests allow us to evaluate the differences in model fit between each pair of models (`model.fit0` vs. `model.fit`, `model.fit0` vs. `model.fit1`, and `model.fit` vs. `model.fit1`), helping to determine if the additional complexity of each model is justified by a notable/significant improvement in explaining the variation in TBV ratio.
 :::
 
+### Scatterplot of TBV Ratio vs Age
 
-Here we will perform a linear regression analysis to predict the brain volume based on the age and group of the patients.
+Here we are looking at the relationship between age and total brain volume `TBV` in two groups of patients: `DMD` (Duchenne Muscular Dystrophy) and `HC` (healthy controls). We want to understand if there is any apparent trend in brain volume across different ages, and if such a trend differs between the two groups.
+
+To assess the overall trend in the data, we include a linear regression line (in black) that fits all the data points. This line represents the general direction and strength of the relationship between age and brain volume across both groups combined. By using a linear model (method = "lm"), we can see if there is an increasing or decreasing trend of TBV with age.
 
 ```{r}
 # Scatterplot of TBV ratio vs Age
@@ -1275,9 +1300,30 @@ p <- ggplot(all_patients, aes(x = Age, y = TBV, color = group)) +
   theme(plot.title = element_text(hjust = 0.5)) +
   geom_smooth(method = "lm", se = FALSE, color = "black") +
   scale_color_manual(values = c("DMD" = "red", "HC" = "green")) +
-  #theme_ft_rc()
   theme_classic()
 
+p <- ggplotly(p)
+p
+```
+
+
+Here we are examining the the relationship between age and total brain volume `TBV` in patients from two distinct groups: `DMD` (Duchenne Muscular Dystrophy) and HC (healthy controls) to visualize whether there are any age-related trends in brain volume and how these trends may differ between the two groups.
+
+We add LOESS lines for each group, which provide a locally smoothed fit to the data. The lines identify non-linear trends in TBV with respect to age, to see how brain volume changes over time for each group and whether these changes differ between groups. By using LOESS, we get a more flexible model compared to linear regression, as it can capture more subtle patterns that a straight line might miss.
+
+The scatterplot is color-coded by group (DMD vs. HC) to distinguish between the two groups, and the LOESS lines are colored red for DMD and green for HC. This color scheme helps to visually separate the groups and identify any differences in the relationship between age and TBV.
+```{r}
+# Scatterplot of TBV ratio vs Age with separate LOESS lines for each group
+p <- ggplot(all_patients, aes(x = Age, y = TBV, color = group)) +
+  geom_point(na.rm = TRUE) +
+  labs(title = "Scatterplot of Brain Volume with LOESS Lines", x = "Age", y = "TBV (cm³)", color = "Group") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  geom_smooth(data = subset(all_patients, group == "DMD"), method = "loess", se = FALSE, color = "red") +
+  geom_smooth(data = subset(all_patients, group == "HC"), method = "loess", se = FALSE, color = "green") +
+  scale_color_manual(values = c("DMD" = "red", "HC" = "green")) +
+  theme_classic()
+
+# Convert ggplot to plotly for interactivity
 p <- ggplotly(p)
 p
 ```
