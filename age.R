@@ -62,8 +62,8 @@ hc_second_visit <- hc %>% filter(Visit == 2)
 # )
 # Example data for DMD patients and healthy controls
 test_hc_first_visit <- data.frame(
-  ID = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11),
-  Age = c(4, 6, 12, 14, 19, 21, 25, 27, 30, 32, 35)
+  ID = c(1, 2, 3, 4, 5, 6, 12, 7, 8, 9, 10, 11),
+  Age = c(4, 6, 12, 14, 15, 19, 21, 25, 27, 30, 32, 35)
 )
 
 
@@ -73,7 +73,7 @@ test_hc_first_visit <- data.frame(
 # 13 - 19 years old
 # 20 - 25 years old
 # 26+ years old
-test_hc_first_visit_ <- test_hc_first_visit %>%
+test_hc_first_visit_ages <- test_hc_first_visit %>%
   mutate(
     age_group = case_when(
       Age <= 5 ~ "0 - 5 years old",
@@ -94,21 +94,21 @@ test_hc_first_visit_ <- test_hc_first_visit %>%
 # message("20 - 25 years old patients:", nrow(test_hc_first_visit_[test_hc_first_visit_$age_group == "20 - 25 years old", ]))
 # message("26+ years old patients:", nrow(test_hc_first_visit_[test_hc_first_visit_$age_group == "26+ years old", ]))
 
-# patients under 5 years old
-test_patients_0_5 <- nrow(test_hc_first_visit_[test_hc_first_visit_$age_group == "0 - 5 years old", ])
-test_percentage_0_5 <- round((100 / nrow(dmd) * test_patients_0_5), 1)
+# # patients under 5 years old
+# test_patients_0_5 <- nrow(test_hc_first_visit_[test_hc_first_visit_$age_group == "0 - 5 years old", ])
+# test_percentage_0_5 <- round((100 / nrow(dmd) * test_patients_0_5), 1)
 
-test_patients_6_12 <- nrow(test_hc_first_visit_[test_hc_first_visit_$age_group == "6 - 12 years old", ])
-test_percentage_6_12 <- round((100 / nrow(dmd) * test_patients_6_12), 1)
+# test_patients_6_12 <- nrow(test_hc_first_visit_[test_hc_first_visit_$age_group == "6 - 12 years old", ])
+# test_percentage_6_12 <- round((100 / nrow(dmd) * test_patients_6_12), 1)
 
-test_patients_13_19 <- nrow(test_hc_first_visit_[test_hc_first_visit_$age_group == "13 - 19 years old", ])
-test_percentage_13_19 <- round((100 / nrow(dmd) * test_patients_13_19), 1)
+# test_patients_13_19 <- nrow(test_hc_first_visit_[test_hc_first_visit_$age_group == "13 - 19 years old", ])
+# test_percentage_13_19 <- round((100 / nrow(dmd) * test_patients_13_19), 1)
 
-test_patients_20_25 <- nrow(test_hc_first_visit_[test_hc_first_visit_$age_group == "20 - 25 years old", ])
-test_percentage_20_25 <- round((100 / nrow(dmd) * test_patients_20_25), 1)
+# test_patients_20_25 <- nrow(test_hc_first_visit_[test_hc_first_visit_$age_group == "20 - 25 years old", ])
+# test_percentage_20_25 <- round((100 / nrow(dmd) * test_patients_20_25), 1)
 
-test_patients_26 <- nrow(test_hc_first_visit_[test_hc_first_visit_$age_group == "26+ years old", ])
-test_percentage_26 <- round((100 / nrow(dmd) * test_patients_26), 1)
+# test_patients_26 <- nrow(test_hc_first_visit_[test_hc_first_visit_$age_group == "26+ years old", ])
+# test_percentage_26 <- round((100 / nrow(dmd) * test_patients_26), 1)
 
 # message("0 - 5 years old patients in percentage:", test_percentage_0_5, "%")
 # message("6 - 12 years old patients in percentage:", test_percentage_6_12, "%")
@@ -144,37 +144,62 @@ hc_first_visit_ages <- hc_first_visit %>%
 
 age_groups <- c("0 - 5 years old", "6 - 12 years old", "13 - 19 years old", "20 - 25 years old", "26+ years old")
 
+
+# print out the amount of patients per age group
+# message("\n")
+
+message("test HC first visit ages:")
+for (age_group in age_groups) {
+  message(age_group, " test HC patients:", nrow(test_hc_first_visit_ages[test_hc_first_visit_ages$age_group == age_group, ]))
+}
+
+
+
+
+
 # DMD
 
-message("DMD first visit ages:")
-for (age_group in age_groups) {
-  message(age_group, " dmd patients:", nrow(dmd_first_visit_ages[dmd_first_visit_ages$age_group == age_group, ]))
-}
+# message("DMD first visit ages:")
+# for (age_group in age_groups) {
+#   message(age_group, " dmd patients:", nrow(dmd_first_visit_ages[dmd_first_visit_ages$age_group == age_group, ]))
+# }
 
-message("\n")
+# message("\n")
 
-message("DMD Patients first visit in percentages")
-for (age_group in age_groups) {
-	patients_count <- nrow(dmd_first_visit_ages[dmd_first_visit_ages$age_group == age_group, ])
-	percentage <- round((100 / nrow(dmd) * patients_count), 1)
-	message(age_group, " patients in percentage:", percentage, "%")
-}
+# message("DMD Patients first visit in percentages")
+# for (age_group in age_groups) {
+# 	patients_count <- nrow(dmd_first_visit_ages[dmd_first_visit_ages$age_group == age_group, ])
+# 	percentage <- round((100 / nrow(dmd) * patients_count), 1)
+# 	message(age_group, " patients in percentage:", percentage, "%")
+# }
 
-#### HC
+#### HC  
 
-message("\n")
 
-message("HC first visit ages:")
-for (age_group in age_groups) {
-	message(age_group, " hc patients:", nrow(hc_first_visit_ages[hc_first_visit_ages$age_group == age_group, ]))
-}
+### actual code 
 
-message("\n")
+# message("\n")
 
-message("HC Patients first visit in percentages")
+# message("HC first visit ages:")
+# for (age_group in age_groups) {
+# 	message(age_group, " hc patients:", nrow(hc_first_visit_ages[hc_first_visit_ages$age_group == age_group, ]))
+# }
 
-for (age_group in age_groups) {
-	patients_count <- nrow(hc_first_visit_ages[hc_first_visit_ages$age_group == age_group, ])
-	percentage <- round((100 / nrow(hc) * patients_count), 1)
-	message(age_group, " patients in percentage:", percentage, "%")
-}
+# message("\n")
+
+# message("HC Patients first visit in percentages")
+
+# for (age_group in age_groups) {
+# 	patients_count <- nrow(hc_first_visit_ages[hc_first_visit_ages$age_group == age_group, ])
+# 	percentage <- round((100 / nrow(hc) * patients_count), 1)
+# 	message(age_group, " patients in percentage:", percentage, "%")
+# }
+
+
+# message("\n")
+
+# message("DMD first visit ages:")
+# for (age_group in age_groups) {
+#   patients_count <- nrow(dmd_first_visit_ages[dmd_first_visit_ages$age_group == age_group, ])
+#   message(age_group, " patients:", patients_count)
+# }
