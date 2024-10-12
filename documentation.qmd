@@ -1228,11 +1228,41 @@ summary(model.fit1)
 :::
 
 ### ANOVA Test
-By using the `anova` function, we will perform an analysis of variance (ANOVA) to compare the linear mixed-effects models `model.fit0` and `model.fit` to determine if the group variable significantly improves the model fit.
+
+We will perform a series of ANOVA tests. ANOVA (Analysis of Variance) helps to compare nested models to determine if adding complexity to the model results in a significantly better fit. Specifically, we will use three ANOVA tests to evaluate different aspects of model complexity:
+
+::: {.panel-tabset .nav-pills}
+
+### ANOVA Test 1
+
+Compares model.fit0 and model.fit. This test will help us determine whether including group and its interaction terms with Age and Age^2 provides a significant improvement in model fit compared to the baseline model (model.fit0), which only includes Age, Age^2, and Scannertype as predictors.
 
 ```{r}
-anova(model.fit0, model.fit)
+anova_results1 <- anova(model.fit0, model.fit)
+print(anova_results1)
 ```
+
+### ANOVA Test 2
+
+Compares `model.fit0` and `model.fit1`. This test evaluates whether adding both group interactions and a random effect for `Scannertype` further improves the model's ability to explain the variation in TBV ratio compared to the simpler baseline model.
+
+```{r}
+anova_results2 <- anova(model.fit0, model.fit1)
+print(anova_results2)
+```
+
+
+### ANOVA Test 3
+
+Compares `model.fit` and `model.fit1`. This test assesses whether including a random effect for `Scannertype` in addition to the fixed effect significantly improves the model fit over model.fit, which already includes group and its interactions.
+```{r}
+anova_results3 <- anova(model.fit, model.fit1)
+print(anova_results3)
+```
+
+
+These ANOVA tests allow us to evaluate the differences in model fit between each pair of models (`model.fit0` vs. `model.fit`, `model.fit0` vs. `model.fit1`, and `model.fit` vs. `model.fit1`), helping to determine if the additional complexity of each model is justified by a notable/significant improvement in explaining the variation in TBV ratio.
+:::
 
 
 Here we will perform a linear regression analysis to predict the brain volume based on the age and group of the patients.
