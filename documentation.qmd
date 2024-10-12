@@ -1190,6 +1190,11 @@ summary(model.Age2)
 
 ### Linear Mixed-Effects Model
 
+
+::: {.panel-tabset .nav-pills}
+
+### Model Fit 0
+
 Here with model.fit0 we will fit a linear mixed-effects model to predict the TBV ratio based on the age, age squared, and scanner type of the patients. We will then print the summary of the model to assess the model fit.
 ```{r}
 model.fit0 <- lmer(TBV_Ratio ~ (1 | ID) + Age + Age2 + Scannertype, data = all_patients)
@@ -1197,13 +1202,30 @@ summary(model.fit0)
 
 ```
 
-
+### Model Fit
 With model.fit we will fit a linear mixed-effects model to predict the TBV ratio based on the age, age squared, and group of the patients. We will then print the summary of the model to assess the model fit.
 ```{r}
 model.fit <- lmer(TBV_Ratio ~ (1 | ID) + Age + Age2 + group + (group * Age) + (group * Age2) + Scannertype, data = all_patients)
 summary(model.fit)
 ```
 
+
+### Model Fit 1
+With model.fit1 we will fit a linear mixed-effect model to predict the TBV ratio based on the age, age squared and corrected for covariance scannertype and group of the patients. We will then print the summary of the model to assess the model fit.
+
+So, to explain, with model.fit1 we will fit a linear mixed-effect model aimed at predicting the Total Brain Volume (TBV) ratio. This model includes `Age` and `Age2` as predictors, while controlling the covariance introduced by `Scannertype` and `group` of the patients. The random intercept for `ID` accounts for individual variability for more accurate predictions by considering each patient's unique baseline characteristics.
+```{r}
+model.fit1 <- lmer(TBV_Ratio ~ (1 | ID) + Age + Age2 + group + (group * Age) + (group * Age2) + Scannertype + (1 | Scannertype), data = all_patients)
+```
+
+
+Summary of `model.fit` will provide information on the fixed effects, random effects, and overall model fit, helping to assess which factors significantly contribute to variations in TBV ratio. By examining the fixed effect coefficients, p-values, and random effect variances, gaining insights into the relationship between age, group, and TBV ratio, and understand how these relationships vary across the patient population.
+
+```{r}
+summary(model.fit1)
+```
+
+:::
 
 ### ANOVA Test
 By using the `anova` function, we will perform an analysis of variance (ANOVA) to compare the linear mixed-effects models `model.fit0` and `model.fit` to determine if the group variable significantly improves the model fit.
