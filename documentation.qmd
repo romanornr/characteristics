@@ -1213,21 +1213,21 @@ display_group_numbers(hc_corticosteroid, "HC", "corticosteroid_group")
 We will perform inferential statistics to compare the TBV ratio between DMD and HC groups. We will conduct a t-test to determine if there is a significant difference in the TBV ratio between the two groups.
 
 
-### T-Test for TBV Ratio and Group Comparison 
+### Linear regresstion analysis for TBV Ratio and Group Comparison 
 We model the TBV ratio as a function of the group and age of the patients using a linear regression model. We then plot the diagnostic plots for the linear model to assess the model assumptions.
 
 In the right tab we will perform a linear regression analysis to predict the brain volume based on the age and group of the patients.
 
 ::: {.panel-tabset .nav-pills}
 
-### T-Test
+### Linear regression analysis
 
 ```{r}
 model <- lm(TBV_Ratio ~ Age, data = all_patients)
 summary(model)
 ```
 
-### Linear Regression Analysis
+### Assumption Checks
 
 ```{r}
 # Create a scatter plot of the TBV ratio and age
