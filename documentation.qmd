@@ -1060,7 +1060,7 @@ gmv_ratio_repeated_measures_scannertype <- ggplot(all_patients, aes(x = Age, y =
   scale_color_discrete(name = "Group") +
   scale_fill_discrete(name = "Group") +
   scale_shape_discrete(name = "Scanner Type") +  # Add a legend for shape
-  labs(title = "GMV vs Age with Repeated Measures", x = "Age", y = "GMV:TBV", color = "Group") +
+  labs(title = "TBV Ratio vs Age with Repeated Measures", x = "Age", y = "TBV Ratio", color = "Group") +
   theme_bw()
 
 p <- ggplotly(gmv_ratio_repeated_measures_scannertype)
