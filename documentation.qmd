@@ -1034,6 +1034,11 @@ p
 ### Repeated Measures with Scannertype
 Here we plot to visualize the relationship between age and the GMV:TBV ratio with repeated measures and Scannertype as the facet variable.
 
+
+We we plot the relationship between age and Total Brain Volume (`TBV`) ratio for Duchenne Muscular Dystrophy (`DMD`) patients and Healthy Controls (`HC`). The plot includes data points representing TBV ratio measurements from the first and second visits, with different shapes used to indicate the type of scanner used.
+
+We also connect the points for each patient to illustrate repeated measures over time. To provide additional insights, we include linear regression lines with confidence intervals for both groups to depict the general trend in TBV ratio with age to see changes in brain volume between groups while accounting for scanner types.
+
 ```{r}
 gmv_ratio_repeated_measures_scannertype <- ggplot(all_patients, aes(x = Age, y = TBV_Ratio, color = group)) +
   
@@ -1067,6 +1072,55 @@ p <- ggplotly(gmv_ratio_repeated_measures_scannertype)
 p
 ```
 
+### Repeated Measures with Scannertype and LOESS Smoothing
+
+He are plotting the relationship between age and Total Brain Volume (`TBV`) ratio for two groups: Duchenne Muscular Dystrophy (`DMD`) patients and Healthy Controls (`HC`). The scatter plot includes points representing TBV ratio measurements taken at the first and second visits, with different shapes to indicate scanner types.
+
+We also connect these points for each individual to show repeated measures over time. Additionally, we add LOESS (Locally Estimated Scatterplot Smoothing) lines for each group to reveal non-linear trends in TBV ratio as age progresses, to get a clearer understanding of brain volume changes within each group.
+```{r}
+# Updated plot with LOESS smoothing lines for each group
+tbv_ratio_repeated_measures_scannertype <- ggplot(all_patients, aes(x = Age, y = TBV_Ratio, color = group)) +
+  
+  # DMD Group - Points and Lines
+  geom_point(data = dmd_patients_first_visit %>% filter(!is.na(Age) & is.finite(Age) & !is.na(TBV_Ratio) & is.finite(TBV_Ratio)), 
+             aes(x = Age, y = TBV_Ratio, color = "DMD", shape = as.factor(Scannertype))) +
+  
+  geom_point(data = dmd_patients_second_visit %>% filter(!is.na(Age) & is.finite(Age) & !is.na(TBV_Ratio) & is.finite(TBV_Ratio)), 
+             aes(x = Age, y = TBV_Ratio, color = "DMD", shape = as.factor(Scannertype))) +
+  
+  geom_line(data = dmd %>% filter(!is.na(Age) & !is.na(TBV_Ratio) & is.finite(Age) & is.finite(TBV_Ratio)), 
+            aes(x = Age, y = TBV_Ratio, group = ID, color = "DMD"), linetype = "solid") +
+  
+  # HC Group - Points and Lines
+  geom_point(data = hc_patients_first_visit %>% filter(!is.na(Age) & is.finite(Age) & !is.na(TBV_Ratio) & is.finite(TBV_Ratio)), 
+             aes(x = Age, y = TBV_Ratio, color = "HC", shape = as.factor(Scannertype))) +
+  
+  geom_point(data = hc_patients_second_visit %>% filter(!is.na(Age) & is.finite(Age) & !is.na(TBV_Ratio) & is.finite(TBV_Ratio)), 
+             aes(x = Age, y = TBV_Ratio, color = "HC", shape = as.factor(Scannertype))) +
+  
+  geom_line(data = hc %>% filter(!is.na(Age) & !is.na(TBV_Ratio) & is.finite(Age) & is.finite(TBV_Ratio)), 
+            aes(x = Age, y = TBV_Ratio, group = ID, color = "HC"), linetype = "solid") +
+  
+  # LOESS Smoothing Lines for each group
+  geom_smooth(data = dmd %>% filter(!is.na(Age) & is.finite(Age) & !is.na(TBV_Ratio) & is.finite(TBV_Ratio)), 
+              aes(x = Age, y = TBV_Ratio, color = "DMD", fill = "DMD"), 
+              method = "loess", se = TRUE, alpha = 0.2) +
+  
+  geom_smooth(data = hc %>% filter(!is.na(Age) & is.finite(Age) & !is.na(TBV_Ratio) & is.finite(TBV_Ratio)), 
+              aes(x = Age, y = TBV_Ratio, color = "HC", fill = "HC"), 
+              method = "loess", se = TRUE, alpha = 0.2) +
+  
+  # Aesthetics
+  scale_color_discrete(name = "Group") +
+  scale_fill_discrete(name = "Group") +
+  scale_shape_discrete(name = "Scanner Type") +  # Add a legend for shape
+  labs(title = "TBV Ratio vs Age with Repeated Measures", x = "Age", y = "TBV Ratio", color = "Group") +
+  theme_bw()
+
+# Convert the ggplot to an interactive plotly plot
+p <- ggplotly(tbv_ratio_repeated_measures_scannertype)
+p
+```
 
 ### Faceted Repeated Measures with Scannertype facet
 
