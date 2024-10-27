@@ -824,6 +824,32 @@ message("Standard deviation of GMV of HC patients:", hc_gmv_sd)
 
 :::
 
+## ICV Analysis
+
+We will analyze the ICV for both DMD and HC patients
+
+::: {.panel-tabset .nav-pills}
+### Mean ICV
+```{r}
+dmd_icv_mean <- round(mean(dmd$ICV, na.rm = TRUE), 1)
+message("Mean ICV of DMD patients:", dmd_icv_mean)
+
+
+hc_icv_mean <- round(mean(hc$ICV, na.rm = TRUE), 1)
+message("Mean ICV of HC patients:", hc_icv_mean)
+```
+
+### Standard Deviation ICV
+```{r}
+dmd_icv_sd <- round(sd(dmd$ICV, na.rm = TRUE), 1)
+message("Standard deviation of ICV of DMD patients:", dmd_icv_sd)
+
+hc_icv_sd <- round(sd(hc$ICV, na.rm = TRUE), 1)
+message("Standard deviation of ICV of HC patients:", hc_icv_sd)
+```
+
+:::
+
 ------------------------------------------------------------------------
 
 ## Linear Regression Analysis
@@ -1497,6 +1523,22 @@ p <- ggplot(all_patients, aes(x= Age, y = TBV, color = group)) +
   scale_color_discrete(name = "Group") +         # Separate legend for color
   scale_fill_discrete(name = "Group") +          # Seperate legend for fill
   labs(title = "Total Brain Volume vs Age", x = "Age", y = "TBV in cm³", color = "Group", shape = "Scanner Type") +
+  theme_bw()
+
+p <- ggplotly(p)
+p
+```
+
+### Scatterplot of TBV vs Age with LOESS Smoothing
+```{r}
+# Scatterplot of TBV vs Age with color and shape by group and scanner type
+p <- ggplot(all_patients, aes(x= Age, y = TBV, color = group)) +
+  geom_point(aes(shape = as.factor(Scannertype))) +
+  geom_smooth(method = "loess", se = TRUE, aes(fill = group)) +
+  scale_shape_discrete(name = "Scanner Type") +  # Separate legend for shape
+  scale_color_discrete(name = "Group") +         # Separate legend for color
+  scale_fill_discrete(name = "Group") +          # Seperate legend for fill
+  labs(title = "Total Brain Volume vs Age with LOESS Smoothing", x = "Age", y = "TBV in cm³", color = "Group", shape = "Scanner Type") +
   theme_bw()
 
 p <- ggplotly(p)
