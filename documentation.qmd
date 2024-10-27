@@ -43,7 +43,7 @@ library(rms)
 library(mgcv)
 
 read_excel_file <- function() {
-  file_path <- "DATASET_V6_SMO.xlsx"
+  file_path <- "DATASET_V8_SMO.xlsx"
   if (!file.exists(file_path)) stop("File does not exist")
   dataset <- read_excel(file_path)
   return (dataset)
@@ -84,7 +84,8 @@ rules <- list(
   TBV = c(9999),
   TBV_Ratio = c(9999),
   Mutation = c(9999),
-  GMV = c(9999)
+  GMV = c(9999),
+  ICV = c(9999)
 )
 ```
 
@@ -1065,7 +1066,7 @@ gmv_ratio_repeated_measures_scannertype <- ggplot(all_patients, aes(x = Age, y =
   scale_color_discrete(name = "Group") +
   scale_fill_discrete(name = "Group") +
   scale_shape_discrete(name = "Scanner Type") +  # Add a legend for shape
-  labs(title = "TBV Ratio vs Age with Repeated Measures", x = "Age", y = "TBV Ratio", color = "Group") +
+  labs(title = "GMV Ratio vs Age with Repeated Measures", x = "Age", y = "GMV Ratio", color = "Group") +
   theme_bw()
 
 p <- ggplotly(gmv_ratio_repeated_measures_scannertype)
@@ -1114,7 +1115,7 @@ tbv_ratio_repeated_measures_scannertype <- ggplot(all_patients, aes(x = Age, y =
   scale_color_discrete(name = "Group") +
   scale_fill_discrete(name = "Group") +
   scale_shape_discrete(name = "Scanner Type") +  # Add a legend for shape
-  labs(title = "TBV Ratio vs Age with Repeated Measures", x = "Age", y = "TBV Ratio", color = "Group") +
+  labs(title = "GMV Ratio vs Age with Repeated Measures", x = "Age", y = "GMV Ratio", color = "Group") +
   theme_bw()
 
 # Convert the ggplot to an interactive plotly plot
@@ -1128,7 +1129,7 @@ Here we create a faceted plot with repeated measures for GMV with the Scannertyp
 
 ```{r}
 p_faceted_repeated_measures <- gmv_ratio_repeated_measures_scannertype + facet_wrap(~ Scannertype)
-p_faceted_repeated_measures <- gmv_ratio_repeated_measures_scannertype + labs(title = "GMV vs age with repeated mesures and Scannertype", x = "Age", y = "GMV:TBV", color = "Group")
+p_faceted_repeated_measures <- gmv_ratio_repeated_measures_scannertype + labs(title = "GMV vs age with repeated mesures and Scannertype", x = "Age", y = "GMV", color = "Group")
 p <- ggplotly(p_faceted_repeated_measures)
 p
 ```
@@ -1396,6 +1397,36 @@ print(anova_results3)
 These ANOVA tests allow us to evaluate the differences in model fit between each pair of models (`model.fit0` vs. `model.fit`, `model.fit0` vs. `model.fit1`, and `model.fit` vs. `model.fit1`), helping to determine if the additional complexity of each model is justified by a notable/significant improvement in explaining the variation in TBV ratio.
 :::
 
+### Final model 
+
+Here we examine factors influencing gray matter volume, as quantified by the GMV ratio, in patients with Duchenne Muscular Dystrophy (DMD) and Healthy Controls (HC). 
+
+
+We fit a linear mixed-effects model to predict the GMV ratio based on age, group, and scanner type, accounting for individual variability and covariates.
+
+::: {.panel-tabset .nav-pills}
+
+### Model fit 1
+```{r}
+model.f1 <- lmer(TBV_Ratio ~ (1 | ID) + Age + Scannertype, data = all_patients)
+print(summary(model.f1))
+```
+
+
+### Model fit 2
+```{r}
+model.f2 <- lmer(TBV_Ratio ~ (1 | ID) + Age + group + Scannertype, data = all_patients)
+print(summary(model.f2))
+```
+
+### Model fit 3
+```{r}
+model.f3 <- lmer(TBV_Ratio ~ (1 | ID) + Age + group + (group * Age) + Scannertype, data = all_patients)
+print(summary(model.f3))
+```
+
+:::
+
 ### Scatterplot of TBV Ratio vs Age
 
 Here we are looking at the relationship between age and total brain volume `TBV` in two groups of patients: `DMD` (Duchenne Muscular Dystrophy) and `HC` (healthy controls). We want to understand if there is any apparent trend in brain volume across different ages, and if such a trend differs between the two groups.
@@ -1647,6 +1678,39 @@ baseplot <- ggplot() +
               method = "loess", se = TRUE, alpha = 0.2) +
   
   labs(title = "Gray Matter Volume vs Age", x = "Age", y = "GMV (cm³)", color = "Group") +
+  theme_bw()
+
+# Convert the ggplot to an interactive plotly plot
+p <- ggplotly(baseplot)
+p
+```
+
+
+### Scatterplot of ICV vs Age
+
+```{r}
+# Updated baseplot with LOESS smoothing lines for each group
+baseplot <- ggplot() +
+  
+  # Points for DMD group
+  geom_point(data = dmd_patients_first_visit, aes(x = Age, y = ICV, color = "DMD", shape = as.factor(Scannertype))) +
+  geom_point(data = dmd_patients_second_visit, aes(x = Age, y = ICV, color = "DMD", shape = as.factor(Scannertype))) +
+  geom_line(data = rbind(dmd_patients_first_visit, dmd_patients_second_visit), aes(x = Age, y = ICV, group = ID, color = "DMD"), linetype = "solid") +
+  
+  # Points for HC group
+  geom_point(data = hc_patients_first_visit, aes(x = Age, y = ICV, color = "HC", shape = as.factor(Scannertype))) +
+  geom_point(data = hc_patients_second_visit, aes(x = Age, y = ICV, color = "HC", shape = as.factor(Scannertype))) +
+  geom_line(data = rbind(hc_patients_first_visit, hc_patients_second_visit), aes(x = Age, y = ICV, group = ID, color = "HC"), linetype = "solid") +
+  
+  # LOESS smoothing line for DMD group
+  geom_smooth(data = dmd, aes(x = Age, y = ICV, color = "DMD", fill = "DMD"), 
+              method = "loess", se = TRUE, alpha = 0.2) +
+  
+  # LOESS smoothing line for HC group
+  geom_smooth(data = hc, aes(x = Age, y = ICV, color = "HC", fill = "HC"), 
+              method = "loess", se = TRUE, alpha = 0.2) +
+  
+  labs(title = "ICV vs Age", x = "Age", y = "ICV (cm³)", color = "Group") +
   theme_bw()
 
 # Convert the ggplot to an interactive plotly plot
